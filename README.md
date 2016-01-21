@@ -2,13 +2,13 @@
 
 Maven Plugin for Sputnik with Multi-Module Support.
 
-Together with Sputnik, Jenkins and Gerrit you can easily setup a pretested commit infrastructure for semi-automatic Code Reviews.
+Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenkins-ci.org) and [Gerrit](https://www.gerritcodereview.com) you can easily setup a pretested commit infrastructure for semi-automatic Code Reviews.
 
 [![Build Status](https://travis-ci.org/mirkosertic/mavensonarsputnik.svg?branch=master)](https://travis-ci.org/mirkosertic/mavensonarsputnik)
 
 ## Usage
 
-The following command can be used in conjunction with the Gerrit Trigger on Jenkins:
+The following command can be used in conjunction with the [Gerrit Trigger](https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger) on Jenkins:
 
 ```
 mvn de.mirkosertic.mavensonarsputnik:sputnik:sputnik 

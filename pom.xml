@@ -7,6 +7,8 @@
     <packaging>maven-plugin</packaging>
 
     <name>maven-sonar-sputnik Maven Plugin</name>
+    <description>A simple Maven Plugin to perform Pretested Commits with Sputnik and Gerrit</description>
+    <url>https://github.com/mirkosertic/mavensonarsputnik</url>
 
     <licenses>
         <license>

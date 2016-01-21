@@ -1,4 +1,4 @@
-# Maven Sonar Sputnik integration
+# Maven Sonar Sputnik Integration
 
 Maven Plugin for Sputnik with Multi-Module Support.
 

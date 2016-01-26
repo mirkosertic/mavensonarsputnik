@@ -9,7 +9,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 ## System Requirements
 
 * Java 8
-* Maven 3.2.3
+* Maven >= 3.2.5
 
 ## Usage
 

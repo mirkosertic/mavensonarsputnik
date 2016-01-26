@@ -33,7 +33,7 @@ import pl.touk.sputnik.engine.Engine;
 /**
  * Execute Sputnik on the project and report the issues to Gerrit.
  */
-@Mojo(name = "sputnik", defaultPhase = LifecyclePhase.COMPILE)
+@Mojo(name = "sputnik", defaultPhase = LifecyclePhase.VERIFY, requiresProject = false)
 public class MavenSonarSputnikMojo extends AbstractMojo {
 
     @Component
@@ -96,23 +96,29 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
 
             StringBuilder theSourceRoots = new StringBuilder();
             for (String theSourceRoot : aProject.getCompileSourceRoots()) {
-                File theFile = new File(aProject.getBasedir(), theSourceRoot);
+                File theFile = new File(theSourceRoot);
                 if (theFile.exists()) {
+                    String theFullName = theSourceRoot;
+                    theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
+
                     if (theSourceRoots.length() > 0) {
                         theSourceRoots.append(",");
                     }
-                    theSourceRoots.append(theSourceRoot.substring(aProject.getBasedir().toString().length() + 1));
+                    theSourceRoots.append(theFullName);
                 }
             }
 
             StringBuilder theTestRoots = new StringBuilder();
             for (String theSourceRoot : aProject.getTestCompileSourceRoots()) {
-                File theFile = new File(aProject.getBasedir(), theSourceRoot);
+                File theFile = new File(theSourceRoot);
                 if (theFile.exists()) {
+                    String theFullName = theSourceRoot;
+                    theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
+
                     if (theTestRoots.length() > 0) {
                         theTestRoots.append(",");
                     }
-                    theTestRoots.append(theSourceRoot.substring(aProject.getBasedir().toString().length() + 1));
+                    theTestRoots.append(theFullName);
                 }
             }
 

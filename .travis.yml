@@ -20,8 +20,8 @@ env:
 python:
   - 2.7
 
-install:
-  - pip install codecov
+before_install:
+  - pip install --user codecov
 
 script:
   - wget $(echo -n $BASEURL | sed -e 's#VERSION#'$VERSION'#g')

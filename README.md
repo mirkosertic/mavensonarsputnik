@@ -10,6 +10,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 
 * Java 8
 * Maven >= 3.2.5
+* SonarQube >= 4.5
 
 ## Usage
 
@@ -41,5 +42,27 @@ sonar.jdbc.driverClassName=<JDBC Driver>
 sonar.jdbc.username=<Sonar username>
 sonar.jdbc.password=<Sonar password>
 sonar.host.url=<URL to Sonar Web UI>
+sonar.dynamicAnalysis=reuseReports
 ```
+
+## Advanced Reporting
+
+SonarQube can generate HTML reports for a given PatchSet. To enable this feature, you have to
+
+* Install the Issues Reports Plugin
+* Add the following lines to your sonar.properties file:
+```
+sonar.issuesReport.console.enable=true
+sonar.issuesReport.html.enable=true
+```
+
+SonarQube will place to files inside the .sonar/issues-report Directory of the workspace:
+
+* issues-report-light.html Contains only the new introduced and removed issues of the PatchSet
+* issues-report-light.html Contails all issues of the PatchSet
+
+These Reports can be easily integrated using the Publish HTML Post Build Action of Jenkins 
+
+ 
+
 

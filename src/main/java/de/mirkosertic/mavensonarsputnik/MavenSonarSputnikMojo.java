@@ -52,20 +52,33 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
     private String gerritRevision;
 
     /**
-     * The Sputnik configuration property file..
+     * The Sputnik configuration property file.
      */
     @Parameter(defaultValue = "${sputnikConfiguration}", required = true)
     private File sputnikConfiguration;
 
     /**
-     * The Sonar configuration property file..
+     * The Sonar configuration property file.
      */
     @Parameter(defaultValue = "${sonarConfiguration}", required = true)
     private File sonarConfiguration;
 
+    /**
+     * Ignore generated sources located inside the project output directory /target/*.
+     */
+    @Parameter(defaultValue = "true", required = true)
+    private boolean ignoreGeneratedCode;
+
     private Properties sputnikProperties;
 
     private Properties sonarProperties;
+
+    private boolean isIgnored(MavenProject aProject, File aFile) {
+        if (ignoreGeneratedCode) {
+            return aFile.toString().startsWith(aProject.getBuild().getDirectory());
+        }
+        return false;
+    }
 
     private void listModulesFor(String aPrefix, MavenProject aProject, int aRecursionLevel, List<MavenProject> aProjectList)
             throws IOException {
@@ -97,7 +110,7 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             StringBuilder theSourceRoots = new StringBuilder();
             for (String theSourceRoot : aProject.getCompileSourceRoots()) {
                 File theFile = new File(theSourceRoot);
-                if (theFile.exists()) {
+                if (theFile.exists() && !isIgnored(aProject, theFile)) {
                     String theFullName = theSourceRoot;
                     theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
 
@@ -111,7 +124,7 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             StringBuilder theTestRoots = new StringBuilder();
             for (String theSourceRoot : aProject.getTestCompileSourceRoots()) {
                 File theFile = new File(theSourceRoot);
-                if (theFile.exists()) {
+                if (theFile.exists() && !isIgnored(aProject, theFile)) {
                     String theFullName = theSourceRoot;
                     theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
 

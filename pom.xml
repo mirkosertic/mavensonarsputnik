@@ -290,7 +290,7 @@
                             <description />
                             <releaseName>${project.version}</releaseName>
                             <tag>${project.version}</tag>
-                            <repositoryId>mirkosertic/cdicron</repositoryId>
+                            <repositoryId>mirkosertic/mavensonarsputnik</repositoryId>
                             <fileSets>
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>

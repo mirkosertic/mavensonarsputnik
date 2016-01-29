@@ -61,6 +61,14 @@ The reports must be stored in the SonarRunner working directory, project-root/.s
 
 An example Report can be generated using [Sonar Delta Report Plugin](https://github.com/mirkosertic/sonardeltareport).
 
+Hint: some report plugins require a full analysis and do report wrong if using with the default Sputnik configuration. To enable full analysis, the following lines must be added to your sonar.properties file:
+
+```
+sonar.analysis.mode=preview
+sonar.inclusions=
+```
+
+
 ### Additional SonarQube Reports
 
 SonarQube can generate HTML reports for a given PatchSet. To enable this feature, you have to

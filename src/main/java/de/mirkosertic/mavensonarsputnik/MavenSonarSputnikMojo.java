@@ -137,6 +137,11 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
 
             sonarProperties.put(aPrefix + ".sources" , theSourceRoots.toString());
             sonarProperties.put(aPrefix + ".tests" , theTestRoots.toString());
+
+            File theOutputDirectory = new File(aProject.getBuild().getOutputDirectory());
+            if (theOutputDirectory.exists()) {
+                sonarProperties.put(aPrefix + ".binaries" , theOutputDirectory.toString());
+            }
         }
 
         String theBaseDir = aProject.getBasedir().toString();

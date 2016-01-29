@@ -29,7 +29,7 @@ script:
   - wget $(echo -n $BASEURL | sed -e 's#VERSION#'$VERSION'#g')
   - tar -xvzf $(echo -n $FILE | sed -e 's#VERSION#'$VERSION'#')
   - export PATH=$(echo -n $DIR | sed -e 's#VERSION#'$VERSION'#'):$PATH
-  - mvn clean org.jacoco:jacoco-maven-plugin:0.7.5.201505241946:prepare-agent test install
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test install
 
 after_success:
   - codecov

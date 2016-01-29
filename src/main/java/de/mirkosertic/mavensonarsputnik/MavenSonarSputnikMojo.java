@@ -33,7 +33,7 @@ import pl.touk.sputnik.engine.Engine;
 /**
  * Execute Sputnik on the project and report the issues to Gerrit.
  */
-@Mojo(name = "sputnik", defaultPhase = LifecyclePhase.VERIFY, requiresProject = false)
+@Mojo(name = "sputnik", defaultPhase = LifecyclePhase.INSTALL, requiresProject = false)
 public class MavenSonarSputnikMojo extends AbstractMojo {
 
     @Component
@@ -140,7 +140,12 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
 
             File theOutputDirectory = new File(aProject.getBuild().getOutputDirectory());
             if (theOutputDirectory.exists()) {
-                sonarProperties.put(aPrefix + ".binaries" , theOutputDirectory.toString());
+                sonarProperties.put(aPrefix + ".java.binaries" , theOutputDirectory.toString());
+            }
+
+            File theTestOutputDirectory = new File(aProject.getBuild().getTestOutputDirectory());
+            if (theTestOutputDirectory.exists()) {
+                sonarProperties.put(aPrefix + ".test.binaries" , theTestOutputDirectory.toString());
             }
         }
 

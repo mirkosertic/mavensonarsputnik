@@ -59,6 +59,8 @@ sonar.additionalReviewCommentFiles=<comma separated list name of text file to em
 
 The reports must be stored in the SonarRunner working directory, project-root/.sonar.
 
+An example Report can be generated using [Sonar Delta Report Plugin](https://github.com/mirkosertic/sonardeltareport).
+
 ### Additional SonarQube Reports
 
 SonarQube can generate HTML reports for a given PatchSet. To enable this feature, you have to

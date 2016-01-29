@@ -49,7 +49,7 @@ sonar.dynamicAnalysis=reuseReports
 
 ### Automated Quality Feedback
 
-The Maven plugin can add reports to the review comments. For instance, a SonqeQube Plugin can generate a simple text file containing statistics about the submitted change and how it affects SonarQube metrics. This file is stored by the Plugin and can be read and added as a review comment.
+The Maven plugin can add reports to the review comments. For instance, a SonarQube Plugin can generate a simple text file containing statistics about the submitted change and how it affects SonarQube metrics. This file is stored by the Plugin and can be read and added as a review comment.
 
 Report embedding can be enabled by the following line in the sonar.properties file:
 

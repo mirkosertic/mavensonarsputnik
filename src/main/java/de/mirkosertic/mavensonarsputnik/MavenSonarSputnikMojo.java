@@ -67,6 +67,12 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
     @Parameter(defaultValue = "${sputnikConfiguration}", required = true)
     private File sputnikConfiguration;
 
+    /**
+     * The Sonar configuration property file.
+     */
+    @Parameter(defaultValue = "${sonarConfiguration}", required = true)
+    private File sonarConfiguration;
+
     @Component
     private ArtifactFactory artifactFactory;
 
@@ -116,7 +122,9 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
 
                     EmbeddedRunner runner = runnerFactory.create();
 
-                    runner.properties().setProperty("sonar.analysis.mode", "incremental");
+                    try (InputStream theStream = new FileInputStream(sonarConfiguration)) {
+                        runner.properties().load(theStream);
+                    }
 
                     new RunnerBootstrapper(getLog(), mavenSession, runner, mavenProjectConverter, extensionsFactory, propertyDecryptor).execute();
 

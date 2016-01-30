@@ -37,12 +37,12 @@ connector.password=<Gerrit password>
 The sonar.properties file contains authentication information to connect to SonarQube:
 
 ```
+# Only Required if you are not declaring SonarQube configuration in pom.xml
 sonar.jdbc.url=<JDBC url to SonarQube database>
 sonar.jdbc.driverClassName=<JDBC Driver>
 sonar.jdbc.username=<Sonar username>
 sonar.jdbc.password=<Sonar password>
 sonar.host.url=<URL to Sonar Web UI>
-sonar.dynamicAnalysis=reuseReports
 ```
 
 ## Advanced Reporting
@@ -51,7 +51,7 @@ sonar.dynamicAnalysis=reuseReports
 
 The Maven plugin can add reports to the review comments. For instance, a SonarQube Plugin can generate a simple text file containing statistics about the submitted change and how it affects SonarQube metrics. This file is stored by the Plugin and can be read and added as a review comment.
 
-Report embedding can be enabled by the following line in the sonar.properties file:
+Report embedding can be enabled by the following line in the sputnik.properties file:
 
 ```
 sonar.additionalReviewCommentFiles=<comma separated list name of text file to embedd as review comment>
@@ -61,14 +61,6 @@ The reports must be stored in the SonarRunner working directory, project-root/.s
 
 An example Report can be generated using [Sonar Delta Report Plugin](https://github.com/mirkosertic/sonardeltareport).
 
-Hint: some report plugins require a full analysis and do report wrong if using with the default Sputnik configuration. To enable full analysis, the following lines must be added to your sonar.properties file:
-
-```
-sonar.analysis.mode=preview
-sonar.inclusions=
-```
-
-
 ### Additional SonarQube Reports
 
 SonarQube can generate HTML reports for a given PatchSet. To enable this feature, you have to
@@ -76,6 +68,7 @@ SonarQube can generate HTML reports for a given PatchSet. To enable this feature
 * Install the Issues Reports Plugin
 * Add the following lines to your sonar.properties file:
 ```
+# This are already the default values
 sonar.issuesReport.console.enable=true
 sonar.issuesReport.html.enable=true
 ```

@@ -110,25 +110,35 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             SonarExecutor theExecutor = new SonarExecutor() {
                 @Override
                 public File executeSonar() throws Exception {
-                    ExtensionsFactory extensionsFactory = new ExtensionsFactory(getLog(), mavenSession, lifecycleExecutor, artifactFactory, localRepository, artifactMetadataSource, artifactCollector,
+                    File theWorkingDirectory = MavenProjectConverter.getSonarWorkDir(mavenSession.getCurrentProject());
+                    theWorkingDirectory.mkdirs();
+
+                    // This will switch the cache to the working directory
+                    System.setProperty("SONAR_USER_HOME", theWorkingDirectory.toString());
+
+                    ExtensionsFactory theExtensionsFactory = new ExtensionsFactory(getLog(), mavenSession, lifecycleExecutor, artifactFactory, localRepository, artifactMetadataSource, artifactCollector,
                             dependencyTreeBuilder, projectBuilder);
-                    DependencyCollector dependencyCollector = new DependencyCollector(dependencyTreeBuilder, localRepository);
-                    MavenProjectConverter mavenProjectConverter = new MavenProjectConverter(getLog(), dependencyCollector);
-                    LogHandler logHandler = new LogHandler(getLog());
+                    DependencyCollector theDependencyCollector = new DependencyCollector(dependencyTreeBuilder, localRepository);
+                    MavenProjectConverter theMavenProjectConverter = new MavenProjectConverter(getLog(), theDependencyCollector);
+                    LogHandler theLogHandler = new LogHandler(getLog());
 
-                    PropertyDecryptor propertyDecryptor = new PropertyDecryptor(getLog(), securityDispatcher);
+                    PropertyDecryptor thePropertyDecryptor = new PropertyDecryptor(getLog(), securityDispatcher);
 
-                    RunnerFactory runnerFactory = new RunnerFactory(logHandler, getLog().isDebugEnabled(), runtimeInformation, mavenSession, propertyDecryptor);
+                    RunnerFactory theRunnerFactory = new RunnerFactory(theLogHandler, getLog().isDebugEnabled(), runtimeInformation, mavenSession, thePropertyDecryptor);
 
-                    EmbeddedRunner runner = runnerFactory.create();
+                    EmbeddedRunner theRunner = theRunnerFactory.create();
 
+                    Properties theSonarConfigurationToAdd = new Properties();
+                    theSonarConfigurationToAdd.load(getClass().getResourceAsStream("/default-sonar.properties"));
                     try (InputStream theStream = new FileInputStream(sonarConfiguration)) {
-                        runner.properties().load(theStream);
+                        theSonarConfigurationToAdd.load(theStream);
                     }
 
-                    new RunnerBootstrapper(getLog(), mavenSession, runner, mavenProjectConverter, extensionsFactory, propertyDecryptor).execute();
+                    theRunner.addGlobalProperties(theSonarConfigurationToAdd);
 
-                    return new File(MavenProjectConverter.getSonarWorkDir(mavenSession.getCurrentProject()), "sonar-report.json");
+                    new RunnerBootstrapper(getLog(), mavenSession, theRunner, theMavenProjectConverter, theExtensionsFactory, thePropertyDecryptor).execute();
+
+                    return new File(theWorkingDirectory, "sonar-report.json");
                 };
             };
 

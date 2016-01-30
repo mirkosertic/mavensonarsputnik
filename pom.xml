@@ -99,28 +99,36 @@
                     <artifactId>pmd-dist</artifactId>
                     <groupId>net.sourceforge.pmd</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>sonar-runner-api</artifactId>
+                    <groupId>org.codehaus.sonar.runner</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>sonar-issues-report-plugin</artifactId>
+                    <groupId>org.codehaus.sonar-plugins</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <artifactId>commons-codec</artifactId>
+            <groupId>commons-codec</groupId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>org.sonarsource.scanner.maven</groupId>
             <artifactId>sonar-maven-plugin</artifactId>
-            <version>LATEST</version>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-dependency-tree</artifactId>
-            <version>2.1</version>
         </dependency>
     </dependencies>
 

@@ -2,11 +2,10 @@ package pl.touk.sputnik.processor.sonar;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
+import de.mirkosertic.mavensonarsputnik.Options;
 import de.mirkosertic.mavensonarsputnik.SonarExecutor;
 import de.mirkosertic.mavensonarsputnik.SonarExecutorHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.annotations.VisibleForTesting;
 
 import pl.touk.sputnik.configuration.Configuration;
-import pl.touk.sputnik.configuration.GeneralOption;
 import pl.touk.sputnik.review.Review;
 import pl.touk.sputnik.review.ReviewException;
 import pl.touk.sputnik.review.ReviewFile;
@@ -52,14 +50,7 @@ public class SonarProcessor implements ReviewProcessor {
 
             SonarResultParser parser = new SonarResultParser(resultFile);
 
-            final Properties theSonarProperties = new Properties();
-            for (final String property: StringUtils.split(configuration.getProperty(GeneralOption.SONAR_PROPERTIES), ',')){
-                final File propertyFile = new File(StringUtils.strip(property));
-                log.info("Loading {}", propertyFile.getAbsolutePath());
-                theSonarProperties.load(new FileInputStream(propertyFile));
-            }
-
-            String theAdditionalFileNames = theSonarProperties.getProperty("sonar.additionalReviewCommentFiles");
+            String theAdditionalFileNames = configuration.getProperty(Options.ADDITIONAL_REPORTS);
             if (theAdditionalFileNames != null) {
                 for (String theFileName : StringUtils.split(theAdditionalFileNames,",")) {
                     File theSingleFile = new File(resultFile.getParent(), theFileName);

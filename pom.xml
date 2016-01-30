@@ -85,6 +85,12 @@
             <version>3.2.1</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-compat</artifactId>
+            <version>3.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>pl.touk</groupId>
             <artifactId>sputnik</artifactId>
             <version>1.5.1</version>
@@ -99,6 +105,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -1,40 +1,24 @@
 package de.mirkosertic.mavensonarsputnik;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Dependency;
+import org.apache.maven.execution.RuntimeInformation;
+import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.plugin.AbstractMojo;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-
-import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.graph.DependencyFilter;
-import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.ArtifactResult;
-import org.eclipse.aether.resolution.DependencyRequest;
-import org.eclipse.aether.resolution.DependencyResult;
-import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.maven.DependencyCollector;
+import org.sonarsource.scanner.maven.ExtensionsFactory;
+import org.sonarsource.scanner.maven.bootstrap.*;
+import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 
 import pl.touk.sputnik.configuration.CliOption;
 import pl.touk.sputnik.configuration.Configuration;
@@ -45,23 +29,25 @@ import pl.touk.sputnik.connector.ConnectorFacadeFactory;
 import pl.touk.sputnik.connector.ConnectorType;
 import pl.touk.sputnik.engine.Engine;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Execute Sputnik on the project and report the issues to Gerrit.
  */
-@Mojo(name = "sputnik", defaultPhase = LifecyclePhase.INSTALL, requiresProject = false)
+@Mojo(name = "sputnik", requiresDependencyResolution = ResolutionScope.TEST, defaultPhase = LifecyclePhase.INSTALL, aggregator = true)
 public class MavenSonarSputnikMojo extends AbstractMojo {
 
-    @Component
+    @Parameter(defaultValue = "${session}", readonly = true)
     private MavenSession mavenSession;
 
     @Component
-    private RepositorySystem repositorySystem;
+    private LifecycleExecutor lifecycleExecutor;
 
-    @Parameter(defaultValue = "${repositorySystemSession}", readonly = true)
-    private RepositorySystemSession repositorySystemSession;
-
-    @Parameter(defaultValue = "${project.remotePluginRepositories}", readonly = true)
-    private List<RemoteRepository> remoteRepositories;
+    @Component
+    private RuntimeInformation runtimeInformation;
 
     /**
      * The gerrit change id.
@@ -81,201 +67,73 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
     @Parameter(defaultValue = "${sputnikConfiguration}", required = true)
     private File sputnikConfiguration;
 
-    /**
-     * The Sonar configuration property file.
-     */
-    @Parameter(defaultValue = "${sonarConfiguration}", required = true)
-    private File sonarConfiguration;
+    @Component
+    private ArtifactFactory artifactFactory;
 
-    /**
-     * Ignore generated sources located inside the project output directory /target/*.
-     */
-    @Parameter(defaultValue = "true", required = true)
-    private boolean ignoreGeneratedCode;
+    @Parameter(defaultValue = "${localRepository}", readonly = true, required = true)
+    private ArtifactRepository localRepository;
 
-    /**
-     * Include maven dependencies into analysis.
-     */
-    @Parameter(defaultValue = "true", required = true)
-    private boolean includeLibraries;
+    @Component
+    private DependencyTreeBuilder dependencyTreeBuilder;
 
-    private Properties sputnikProperties;
+    @Component
+    private MavenProjectBuilder projectBuilder;
 
-    private Properties sonarProperties;
+    @Component
+    private ArtifactMetadataSource artifactMetadataSource;
 
-    private boolean isIgnored(MavenProject aProject, File aFile) {
-        if (ignoreGeneratedCode) {
-            return aFile.toString().startsWith(aProject.getBuild().getDirectory());
-        }
-        return false;
-    }
+    @Component
+    private ArtifactCollector artifactCollector;
 
-    private void resolveArtifacts(MavenProject aProject, StringBuilder aStringBuilder, String aScope) {
-        Set<File> theAlreadyProcessed = new HashSet<>();
-        for (Dependency theDependency : aProject.getDependencies()) {
-
-            try {
-                CollectRequest theCollectRequest = new CollectRequest();
-                theCollectRequest.setRoot(new org.eclipse.aether.graph.Dependency(
-                        new DefaultArtifact(theDependency.getGroupId(), theDependency.getArtifactId(),
-                                theDependency.getClassifier(), theDependency.getType(), theDependency.getVersion()), aScope));
-                for (RemoteRepository theRepository : remoteRepositories) {
-                    theCollectRequest.addRepository(theRepository);
-                }
-
-                DependencyFilter theDependencyFilter = DependencyFilterUtils.classpathFilter(aScope);
-                DependencyRequest theDependencyRequest = new DependencyRequest(theCollectRequest, theDependencyFilter);
-
-                DependencyResult theDependencyResult = repositorySystem
-                        .resolveDependencies(repositorySystemSession, theDependencyRequest);
-
-                for (ArtifactResult theArtifactResult : theDependencyResult.getArtifactResults()) {
-                    Artifact theResolved = theArtifactResult.getArtifact();
-
-                    File theFile = theResolved.getFile();
-                    if (theFile != null && theAlreadyProcessed.add(theFile)) {
-                        if (aStringBuilder.length() > 0) {
-                            aStringBuilder.append(",");
-                        }
-                        aStringBuilder.append(theFile);
-                    }
-                }
-            } catch (Exception e) {
-                getLog().warn("Error resolving " + theDependency, e);
-            }
-        }
-    }
-
-    private void listModulesFor(String aPrefix, MavenProject aProject, int aRecursionLevel, List<MavenProject> aProjectList) {
-        StringBuilder theBuilder = new StringBuilder();
-        for (int i=0;i<aRecursionLevel;i++) {
-            theBuilder.append(" ");
-        }
-
-        List<String> theModules = new ArrayList<String>();
-
-        for (MavenProject theProject : aProjectList) {
-            if (theProject.getParent() == aProject) {
-                listModulesFor(theProject.getArtifactId() + ".sonar" , theProject, aRecursionLevel + 1, aProjectList);
-                theModules.add(theProject.getArtifactId());
-            }
-        }
-
-        if (!theModules.isEmpty()) {
-            StringBuilder theModulesConfig = new StringBuilder();
-            for (String theData : theModules) {
-                if (theModulesConfig.length() > 0) {
-                    theModulesConfig.append(",");
-                }
-                theModulesConfig.append(theData);
-            }
-            sonarProperties.put(aPrefix + ".modules" , theModulesConfig.toString());
-        } else {
-
-            StringBuilder theSourceRoots = new StringBuilder();
-            for (String theSourceRoot : aProject.getCompileSourceRoots()) {
-                File theFile = new File(theSourceRoot);
-                if (theFile.exists() && !isIgnored(aProject, theFile)) {
-                    String theFullName = theSourceRoot;
-                    theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
-
-                    if (theSourceRoots.length() > 0) {
-                        theSourceRoots.append(",");
-                    }
-                    theSourceRoots.append(theFullName);
-                }
-            }
-
-            StringBuilder theTestRoots = new StringBuilder();
-            for (String theSourceRoot : aProject.getTestCompileSourceRoots()) {
-                File theFile = new File(theSourceRoot);
-                if (theFile.exists() && !isIgnored(aProject, theFile)) {
-                    String theFullName = theSourceRoot;
-                    theFullName = theFullName.substring(aProject.getBasedir().toString().length() + 1);
-
-                    if (theTestRoots.length() > 0) {
-                        theTestRoots.append(",");
-                    }
-                    theTestRoots.append(theFullName);
-                }
-            }
-
-            sonarProperties.put(aPrefix + ".sources" , theSourceRoots.toString());
-            sonarProperties.put(aPrefix + ".tests" , theTestRoots.toString());
-
-            File theOutputDirectory = new File(aProject.getBuild().getOutputDirectory());
-            if (theOutputDirectory.exists()) {
-                sonarProperties.put(aPrefix + ".java.binaries" , theOutputDirectory.toString());
-            }
-
-            File theTestOutputDirectory = new File(aProject.getBuild().getTestOutputDirectory());
-            if (theTestOutputDirectory.exists()) {
-                sonarProperties.put(aPrefix + ".java.test.binaries" , theTestOutputDirectory.toString());
-            }
-
-            if (includeLibraries) {
-                StringBuilder theLibraries = new StringBuilder();
-                resolveArtifacts(aProject, theLibraries, JavaScopes.COMPILE);
-                if (theLibraries.length() > 0) {
-                    sonarProperties.put(aPrefix + ".java.libraries", theLibraries.toString());
-                }
-
-                StringBuilder theTestLibraries = new StringBuilder();
-                resolveArtifacts(aProject, theTestLibraries, JavaScopes.TEST);
-                if (theTestLibraries.length() > 0) {
-                    sonarProperties.put(aPrefix + ".java.test.libraries", theTestLibraries.toString());
-                }
-            }
-        }
-
-        String theBaseDir = aProject.getBasedir().toString();
-        sonarProperties.put(aPrefix + ".projectBaseDir", theBaseDir);
-    }
+    @Component(hint = "mng-4384")
+    private SecDispatcher securityDispatcher;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         try {
-            MavenProject theProject = mavenSession.getCurrentProject();
-
-            sputnikProperties = new Properties();
-            sputnikProperties.load(getClass().getResourceAsStream("/default-sputnik.properties"));
+            Properties theSputnikProperties = new Properties();
+            theSputnikProperties.load(getClass().getResourceAsStream("/default-sputnik.properties"));
 
             try (InputStream theStream = new FileInputStream(sputnikConfiguration)) {
-                sputnikProperties.load(theStream);
+                theSputnikProperties.load(theStream);
             }
 
-            sputnikProperties.setProperty(CliOption.CHANGE_ID.getKey(), gerritChangeId);
-            sputnikProperties.setProperty(CliOption.REVISION_ID.getKey(), gerritRevision);
+            theSputnikProperties.setProperty(CliOption.CHANGE_ID.getKey(), gerritChangeId);
+            theSputnikProperties.setProperty(CliOption.REVISION_ID.getKey(), gerritRevision);
 
-            sonarProperties = new Properties();
-            sonarProperties.load(getClass().getResourceAsStream("/default-sonar.properties"));
-            sonarProperties.put("sonar.projectName", theProject.getName());
-            sonarProperties.put("sonar.projectVersion", theProject.getVersion());
-            sonarProperties.put("sonar.projectKey", theProject.getGroupId() + ":" + theProject.getArtifactId());
+            SonarExecutor theExecutor = new SonarExecutor() {
+                @Override
+                public File executeSonar() throws Exception {
+                    ExtensionsFactory extensionsFactory = new ExtensionsFactory(getLog(), mavenSession, lifecycleExecutor, artifactFactory, localRepository, artifactMetadataSource, artifactCollector,
+                            dependencyTreeBuilder, projectBuilder);
+                    DependencyCollector dependencyCollector = new DependencyCollector(dependencyTreeBuilder, localRepository);
+                    MavenProjectConverter mavenProjectConverter = new MavenProjectConverter(getLog(), dependencyCollector);
+                    LogHandler logHandler = new LogHandler(getLog());
 
-            try (InputStream theStream = new FileInputStream(sonarConfiguration)) {
-                sonarProperties.load(theStream);
-            }
+                    PropertyDecryptor propertyDecryptor = new PropertyDecryptor(getLog(), securityDispatcher);
 
-            if (mavenSession.getTopLevelProject() == theProject) {
-                // Run only once at the end of maven execution
-                List<MavenProject> theProjects = mavenSession.getProjects();
-                listModulesFor("sonar", mavenSession.getTopLevelProject(), 0, theProjects);
+                    RunnerFactory runnerFactory = new RunnerFactory(logHandler, getLog().isDebugEnabled(), runtimeInformation, mavenSession, propertyDecryptor);
 
-                File theTempFile = File.createTempFile("sputnik-sonar", ".properties");
-                try (FileOutputStream theStream = new FileOutputStream(theTempFile)) {
-                    sonarProperties.store(theStream, "");;
-                }
-                sputnikProperties.setProperty(GeneralOption.SONAR_PROPERTIES.getKey(), theTempFile.toString());
+                    EmbeddedRunner runner = runnerFactory.create();
 
-                Configuration theConfiguration = ConfigurationBuilder.initFromProperties(sputnikProperties);
+                    runner.properties().setProperty("sonar.analysis.mode", "incremental");
 
-                ConnectorFacade facade = getConnectorFacade(theConfiguration);
-                new Engine(facade, theConfiguration).run();
-            }
+                    new RunnerBootstrapper(getLog(), mavenSession, runner, mavenProjectConverter, extensionsFactory, propertyDecryptor).execute();
 
+                    return new File(MavenProjectConverter.getSonarWorkDir(mavenSession.getCurrentProject()), "sonar-report.json");
+                };
+            };
+
+            SonarExecutorHelper.set(theExecutor);
+
+            Configuration theConfiguration = ConfigurationBuilder.initFromProperties(theSputnikProperties);
+
+            ConnectorFacade facade = getConnectorFacade(theConfiguration);
+            new Engine(facade, theConfiguration).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Error invoking sputnik", e);
+        } finally {
+            SonarExecutorHelper.remove();
         }
     }
 

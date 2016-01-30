@@ -17,7 +17,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 The following command can be used in conjunction with the [Gerrit Trigger](https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger) on Jenkins:
 
 ```
-mvn de.mirkosertic.mavensonarsputnik:sputnik:1.2:sputnik 
+mvn de.mirkosertic.mavensonarsputnik:sputnik:1.3:sputnik 
    -DgerritRevision=<GERRIT_REVISION_ID> 
    -DgerritChangeId=<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 
@@ -46,6 +46,30 @@ sonar.dynamicAnalysis=reuseReports
 ```
 
 ## Advanced Reporting
+
+### Automated Quality Feedback
+
+The Maven plugin can add reports to the review comments. For instance, a SonarQube Plugin can generate a simple text file containing statistics about the submitted change and how it affects SonarQube metrics. This file is stored by the Plugin and can be read and added as a review comment.
+
+Report embedding can be enabled by the following line in the sonar.properties file:
+
+```
+sonar.additionalReviewCommentFiles=<comma separated list name of text file to embedd as review comment>
+```
+
+The reports must be stored in the SonarRunner working directory, project-root/.sonar.
+
+An example Report can be generated using [Sonar Delta Report Plugin](https://github.com/mirkosertic/sonardeltareport).
+
+Hint: some report plugins require a full analysis and do report wrong if using with the default Sputnik configuration. To enable full analysis, the following lines must be added to your sonar.properties file:
+
+```
+sonar.analysis.mode=preview
+sonar.inclusions=
+```
+
+
+### Additional SonarQube Reports
 
 SonarQube can generate HTML reports for a given PatchSet. To enable this feature, you have to
 

@@ -18,6 +18,7 @@ env:
     - VERSION=3.3.1
     - VERSION=3.2.5
 
+
 python:
   - 2.7
 
@@ -28,7 +29,6 @@ script:
   - wget $(echo -n $BASEURL | sed -e 's#VERSION#'$VERSION'#g')
   - tar -xvzf $(echo -n $FILE | sed -e 's#VERSION#'$VERSION'#')
   - export PATH=$(echo -n $DIR | sed -e 's#VERSION#'$VERSION'#'):$PATH
-  - mvn clean verify
 
 after_success:
   - codecov

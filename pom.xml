@@ -3,7 +3,7 @@
 
     <groupId>de.mirkosertic.mavensonarsputnik</groupId>
     <artifactId>sputnik</artifactId>
-    <version>1.4</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>maven-sonar-sputnik Maven Plugin</name>
@@ -37,7 +37,7 @@
         <connection>scm:git:https://github.com/mirkosertic/mavensonarsputnik.git</connection>
         <developerConnection>scm:git:https://github.com/mirkosertic/mavensonarsputnik.git</developerConnection>
         <url>https://github.com/mirkosertic/mavensonarsputnik.git</url>
-        <tag>1.4</tag>
+        <tag>1.0</tag>
     </scm>
 
     <prerequisites>

@@ -79,13 +79,13 @@ public class SonarProcessor implements ReviewProcessor {
     @VisibleForTesting
     ReviewResult filterResults(ReviewResult results, Review review) {
         ReviewResult filteredResults = new ReviewResult();
-        Set<String> reviewFiles = new HashSet<>();
-        for (ReviewFile file : review.getFiles()) {
-            reviewFiles.add(file.getReviewFilename());
-        }
+
+        // Sonar might not report the full qualified file names, so this is the best guess
         for (Violation violation : results.getViolations()) {
-            if (reviewFiles.contains(violation.getFilenameOrJavaClassName())) {
-                filteredResults.add(violation);
+            for (ReviewFile theFile : review.getFiles()) {
+                if (theFile.getReviewFilename().endsWith(violation.getFilenameOrJavaClassName())) {
+                    filteredResults.add(new Violation(theFile.getReviewFilename(), violation.getLine(), violation.getMessage(), violation.getSeverity()));
+                }
             }
         }
         return filteredResults;

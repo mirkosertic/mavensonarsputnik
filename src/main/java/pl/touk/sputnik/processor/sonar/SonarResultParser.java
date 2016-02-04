@@ -118,20 +118,10 @@ class SonarResultParser {
         Component comp = components.get(issueComponent);
         String file = comp.path;
         if (!Strings.isNullOrEmpty(comp.moduleKey)) {
-            String theKey = comp.moduleKey;
-            while (!theKey.isEmpty()) {
-                Component theChildComp = components.get(theKey);
+            Component theChildComp = components.get(comp.moduleKey);
 
-                int p = theKey.lastIndexOf(":");
-                if (p>0) {
-                    theKey = theKey.substring(0, p);
-                } else {
-                    theKey = "";
-                }
-
-                if (theChildComp != null && !Strings.isNullOrEmpty(theChildComp.path)) {
-                    file = theChildComp.path + '/' + file;
-                }
+            if (theChildComp != null && !Strings.isNullOrEmpty(theChildComp.path)) {
+                file = theChildComp.path + '/' + file;
             }
         }
         return file;

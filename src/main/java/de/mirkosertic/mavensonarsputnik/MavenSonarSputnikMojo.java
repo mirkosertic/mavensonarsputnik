@@ -1,5 +1,6 @@
 package de.mirkosertic.mavensonarsputnik;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -52,13 +53,13 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
     /**
      * The gerrit change id.
      */
-    @Parameter(defaultValue = "${gerritChangeId}", required = true)
+    @Parameter(defaultValue = "${gerritChangeId}")
     private String gerritChangeId;
 
     /**
      * The gerrit revision id.
      */
-    @Parameter(defaultValue = "${gerritRevision}", required = true)
+    @Parameter(defaultValue = "${gerritRevision}")
     private String gerritRevision;
 
     /**
@@ -104,8 +105,32 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
                 theSputnikProperties.load(theStream);
             }
 
-            theSputnikProperties.setProperty(CliOption.CHANGE_ID.getKey(), gerritChangeId);
-            theSputnikProperties.setProperty(CliOption.REVISION_ID.getKey(), gerritRevision);
+            String theChangeID = gerritChangeId;
+            if (StringUtils.isEmpty(theChangeID)) {
+                theChangeID = System.getProperty("GERRIT_CHANGE_ID");
+            }
+            if (StringUtils.isEmpty(theChangeID)) {
+                theChangeID = System.getenv("GERRIT_CHANGE_ID");
+            }
+            if (StringUtils.isEmpty(theChangeID)) {
+                getLog().info("Disabling Plugin as no GERRIT_CHANGE_ID was set in the environment, as a system property or the plugin configuration (gerritChangeId).");
+                return;
+            }
+
+            String theRevision = gerritRevision;
+            if (StringUtils.isEmpty(theRevision)) {
+                theRevision = System.getProperty("GERRIT_PATCHSET_REVISION");
+            }
+            if (StringUtils.isEmpty(theRevision)) {
+                theRevision = System.getenv("GERRIT_PATCHSET_REVISION");
+            }
+            if (StringUtils.isEmpty(theRevision)) {
+                getLog().info("Disabling Plugin as no GERRIT_PATCHSET_REVISION was set in the environment, as a system property or the plugin configuration (gerritRevision).");
+                return;
+            }
+
+            theSputnikProperties.setProperty(CliOption.CHANGE_ID.getKey(), theChangeID);
+            theSputnikProperties.setProperty(CliOption.REVISION_ID.getKey(), theRevision);
 
             SonarExecutor theExecutor = new SonarExecutor() {
                 @Override

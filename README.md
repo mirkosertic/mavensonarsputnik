@@ -75,8 +75,8 @@ sonar.issuesReport.html.enable=true
 
 SonarQube will place to files inside the .sonar/issues-report Directory of the workspace:
 
-* issues-report-light.html Contains only the new introduced and removed issues of the PatchSet
-* issues-report-light.html Contains all issues of the PatchSet
+* issues-report-light.html contains only the new introduced and removed issues of the PatchSet
+* issues-report.html contains all issues of the PatchSet
 
 These Reports can be easily integrated using the Publish HTML Post Build Action of Jenkins 
 

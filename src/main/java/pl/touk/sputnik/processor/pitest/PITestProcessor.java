@@ -143,6 +143,20 @@ public class PITestProcessor implements ReviewProcessor {
                             theMessage.append(theDescription);
                         }
 
+                        NodeList theTestInfos = theElement.getElementsByTagName("testInfo");
+                        if (theTestInfos != null && theTestInfos.getLength() > 0) {
+                            theMessage.append("\n");
+                            theMessage.append("\n");
+                            theMessage.append("Related Unit Tests:");
+                            theMessage.append("\n");
+                            for (int j = 0; j < theTestInfos.getLength(); j++) {
+                                Element theTestInfo = (Element) theTestInfos.item(j);
+                                theMessage.append("*");
+                                theMessage.append(theTestInfo.getTextContent());
+                                theMessage.append("\n");
+                            }
+                        }
+
                         Violation theViolation = new Violation(theFile.getReviewFilename(), theLineNumber, theMessage.toString(),
                                 severity);
 

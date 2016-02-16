@@ -9,16 +9,13 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonarsource.scanner.maven.DependencyCollector;
-import org.sonarsource.scanner.maven.ExtensionsFactory;
-import org.sonarsource.scanner.maven.bootstrap.*;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 
 import pl.touk.sputnik.configuration.CliOption;
@@ -49,6 +46,9 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
 
     @Component
     private RuntimeInformation runtimeInformation;
+
+    @Component
+    private BuildPluginManager pluginManager;
 
     /**
      * The gerrit change id.
@@ -132,42 +132,11 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             theSputnikProperties.setProperty(CliOption.CHANGE_ID.getKey(), theChangeID);
             theSputnikProperties.setProperty(CliOption.REVISION_ID.getKey(), theRevision);
 
-            SonarExecutor theExecutor = new SonarExecutor() {
-                @Override
-                public File executeSonar() throws Exception {
-                    File theWorkingDirectory = MavenProjectConverter.getSonarWorkDir(mavenSession.getCurrentProject());
-                    theWorkingDirectory.mkdirs();
-
-                    // This will switch the cache to the working directory
-                    System.setProperty("SONAR_USER_HOME", theWorkingDirectory.toString());
-
-                    ExtensionsFactory theExtensionsFactory = new ExtensionsFactory(getLog(), mavenSession, lifecycleExecutor, artifactFactory, localRepository, artifactMetadataSource, artifactCollector,
-                            dependencyTreeBuilder, projectBuilder);
-                    DependencyCollector theDependencyCollector = new DependencyCollector(dependencyTreeBuilder, localRepository);
-                    MavenProjectConverter theMavenProjectConverter = new MavenProjectConverter(getLog(), theDependencyCollector);
-                    LogHandler theLogHandler = new LogHandler(getLog());
-
-                    PropertyDecryptor thePropertyDecryptor = new PropertyDecryptor(getLog(), securityDispatcher);
-
-                    RunnerFactory theRunnerFactory = new RunnerFactory(theLogHandler, getLog().isDebugEnabled(), runtimeInformation, mavenSession, thePropertyDecryptor);
-
-                    EmbeddedRunner theRunner = theRunnerFactory.create();
-
-                    Properties theSonarConfigurationToAdd = new Properties();
-                    theSonarConfigurationToAdd.load(getClass().getResourceAsStream("/default-sonar.properties"));
-                    try (InputStream theStream = new FileInputStream(sonarConfiguration)) {
-                        theSonarConfigurationToAdd.load(theStream);
-                    }
-
-                    theRunner.addGlobalProperties(theSonarConfigurationToAdd);
-
-                    new RunnerBootstrapper(getLog(), mavenSession, theRunner, theMavenProjectConverter, theExtensionsFactory, thePropertyDecryptor).execute();
-
-                    return new File(theWorkingDirectory, "sonar-report.json");
-                };
-            };
-
-            SonarExecutorHelper.set(theExecutor);
+            MavenEnvironment.initialize(mavenSession, pluginManager, getLog(),
+                    dependencyTreeBuilder, localRepository,
+                    securityDispatcher, projectBuilder,
+                    lifecycleExecutor, artifactFactory,
+                    artifactMetadataSource, artifactCollector, sonarConfiguration, runtimeInformation);
 
             Configuration theConfiguration = ConfigurationBuilder.initFromProperties(theSputnikProperties);
 
@@ -175,16 +144,14 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             new Engine(facade, theConfiguration).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Error invoking sputnik", e);
-        } finally {
-            SonarExecutorHelper.remove();
         }
     }
 
-    private static ConnectorFacade getConnectorFacade(Configuration configuration) {
+    private static ConnectorFacade getConnectorFacade(Configuration aConfiguration) {
         ConnectorType theConnectorType = ConnectorType
-                .getValidConnectorType(configuration.getProperty(GeneralOption.CONNECTOR_TYPE));
-        ConnectorFacade theFacade = ConnectorFacadeFactory.INSTANCE.build(theConnectorType, configuration);
-        theFacade.validate(configuration);
+                .getValidConnectorType(aConfiguration.getProperty(GeneralOption.CONNECTOR_TYPE));
+        ConnectorFacade theFacade = ConnectorFacadeFactory.INSTANCE.build(theConnectorType, aConfiguration);
+        theFacade.validate(aConfiguration);
         return theFacade;
     }
 }

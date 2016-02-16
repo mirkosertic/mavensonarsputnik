@@ -2,18 +2,25 @@ package pl.touk.sputnik.processor.sonar;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.InputStream;
+import java.util.Properties;
 
+import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import de.mirkosertic.mavensonarsputnik.Options;
-import de.mirkosertic.mavensonarsputnik.SonarExecutor;
-import de.mirkosertic.mavensonarsputnik.SonarExecutorHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.maven.DependencyCollector;
+import org.sonarsource.scanner.maven.ExtensionsFactory;
+import org.sonarsource.scanner.maven.bootstrap.LogHandler;
+import org.sonarsource.scanner.maven.bootstrap.MavenProjectConverter;
+import org.sonarsource.scanner.maven.bootstrap.PropertyDecryptor;
+import org.sonarsource.scanner.maven.bootstrap.RunnerBootstrapper;
+import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -44,9 +51,37 @@ public class SonarProcessor implements ReviewProcessor {
         }
 
         try {
-            SonarExecutor theExecutor = SonarExecutorHelper.get();
+            MavenEnvironment theEnvironment = MavenEnvironment.get();
 
-            File resultFile = theExecutor.executeSonar();
+            File theWorkingDirectory = MavenProjectConverter.getSonarWorkDir(theEnvironment.getMavenSession().getCurrentProject());
+            theWorkingDirectory.mkdirs();
+
+            // This will switch the cache to the working directory
+            System.setProperty("SONAR_USER_HOME", theWorkingDirectory.toString());
+
+            ExtensionsFactory theExtensionsFactory = new ExtensionsFactory(theEnvironment.getLog(), theEnvironment.getMavenSession(), theEnvironment.getLifecycleExecutor(), theEnvironment.getArtifactFactory(), theEnvironment.getLocalRepository(), theEnvironment.getArtifactMetadataSource(), theEnvironment.getArtifactCollector(),
+                    theEnvironment.getDependencyTreeBuilder(), theEnvironment.getProjectBuilder());
+            DependencyCollector theDependencyCollector = new DependencyCollector(theEnvironment.getDependencyTreeBuilder(), theEnvironment.getLocalRepository());
+            MavenProjectConverter theMavenProjectConverter = new MavenProjectConverter(theEnvironment.getLog(), theDependencyCollector);
+            LogHandler theLogHandler = new LogHandler(theEnvironment.getLog());
+
+            PropertyDecryptor thePropertyDecryptor = new PropertyDecryptor(theEnvironment.getLog(), theEnvironment.getSecurityDispatcher());
+
+            RunnerFactory theRunnerFactory = new RunnerFactory(theLogHandler, theEnvironment.getLog().isDebugEnabled(), theEnvironment.getRuntimeInformation(), theEnvironment.getMavenSession(), thePropertyDecryptor);
+
+            EmbeddedRunner theRunner = theRunnerFactory.create();
+
+            Properties theSonarConfigurationToAdd = new Properties();
+            theSonarConfigurationToAdd.load(getClass().getResourceAsStream("/default-sonar.properties"));
+            try (InputStream theStream = new FileInputStream(theEnvironment.getSonarConfiguration())) {
+                theSonarConfigurationToAdd.load(theStream);
+            }
+
+            theRunner.addGlobalProperties(theSonarConfigurationToAdd);
+
+            new RunnerBootstrapper(theEnvironment.getLog(), theEnvironment.getMavenSession(), theRunner, theMavenProjectConverter, theExtensionsFactory, thePropertyDecryptor).execute();
+
+            File resultFile = new File(theWorkingDirectory, "sonar-report.json");
 
             SonarResultParser parser = new SonarResultParser(resultFile);
 

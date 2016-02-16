@@ -47,6 +47,22 @@ sonar.host.url=<URL to Sonar Web UI>
 
 ## Advanced Reporting
 
+### Mutation Testing
+
+This plugin can integrate Mutation Testing results based on PITest in the review. To enable this,
+PITest must be executed as part of the Maven build.
+
+Additional goals and configuration:
+
+```
+mvn org.pitest:pitest-maven:1.1.9:scmMutationCoverage -DanalyseLastCommit=true
+```
+
+### OWASP Dependency Checks
+
+This plugin also runs a OWASP Dependency Check in case of any changes at the Maven project configuration, hence if a pom.xml is 
+part of the current patchset.
+
 ### Automated Quality Feedback
 
 The Maven plugin can add reports to the review comments. For instance, a SonarQube Plugin can generate a simple text file containing statistics about the submitted change and how it affects SonarQube metrics. This file is stored by the Plugin and can be read and added as a review comment.
@@ -78,8 +94,4 @@ SonarQube will place to files inside the .sonar/issues-report Directory of the w
 * issues-report-light.html contains only the new introduced and removed issues of the PatchSet
 * issues-report.html contains all issues of the PatchSet
 
-These Reports can be easily integrated using the Publish HTML Post Build Action of Jenkins 
-
- 
-
-
+These Reports can be easily integrated using the Publish HTML Post Build Action of Jenkins

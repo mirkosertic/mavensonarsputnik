@@ -8,6 +8,7 @@ import pl.touk.sputnik.processor.codenarc.CodeNarcProcessor;
 import pl.touk.sputnik.processor.findbugs.FindBugsProcessor;
 import pl.touk.sputnik.processor.jshint.JsHintProcessor;
 import pl.touk.sputnik.processor.jslint.JsLintProcessor;
+import pl.touk.sputnik.processor.owasp.OWASPDependencyCheckProcessor;
 import pl.touk.sputnik.processor.pitest.PITestProcessor;
 import pl.touk.sputnik.processor.pmd.PmdProcessor;
 import pl.touk.sputnik.processor.scalastyle.ScalastyleProcessor;
@@ -48,6 +49,9 @@ public class ProcessorBuilder {
         }
         if (Boolean.valueOf(configuration.getProperty(PITestProcessor.PITEST_ENABLED))) {
             processors.add(new PITestProcessor(configuration));
+        }
+        if (Boolean.valueOf(configuration.getProperty(OWASPDependencyCheckProcessor.OWASPDEPENDENCYCHECK_ENABLED))) {
+            processors.add(new OWASPDependencyCheckProcessor(configuration));
         }
         return processors;
     }

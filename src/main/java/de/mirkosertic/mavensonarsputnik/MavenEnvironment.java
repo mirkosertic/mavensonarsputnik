@@ -1,6 +1,5 @@
 package de.mirkosertic.mavensonarsputnik;
 
-import java.io.File;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -29,19 +28,18 @@ public class MavenEnvironment {
     private final ArtifactFactory artifactFactory;
     private final ArtifactMetadataSource artifactMetadataSource;
     private final ArtifactCollector artifactCollector;
-    private final File sonarConfiguration;
     private final RuntimeInformation runtimeInformation;
 
     public static void initialize(MavenSession aMavenSession, BuildPluginManager aBuildPluginManager, Log aLog,
             DependencyTreeBuilder aDependencyTreeBuilder, ArtifactRepository aLocalRepository,
             SecDispatcher aSecurityDispatcher, MavenProjectBuilder aProjectBuilder,
             LifecycleExecutor aLifecycleExecutor, ArtifactFactory aArtifactFactory,
-            ArtifactMetadataSource aArtifactMetadataSource, ArtifactCollector aArtifactCollector, File aSonarConfiguration, RuntimeInformation aRuntimeInformation) {
+            ArtifactMetadataSource aArtifactMetadataSource, ArtifactCollector aArtifactCollector, RuntimeInformation aRuntimeInformation) {
         ENVIRONMENT.set(new MavenEnvironment(aMavenSession, aBuildPluginManager, aLog,
                 aDependencyTreeBuilder, aLocalRepository,
                 aSecurityDispatcher, aProjectBuilder,
                 aLifecycleExecutor, aArtifactFactory,
-                aArtifactMetadataSource, aArtifactCollector, aSonarConfiguration, aRuntimeInformation));
+                aArtifactMetadataSource, aArtifactCollector, aRuntimeInformation));
     }
 
     public static MavenEnvironment get() {
@@ -52,7 +50,7 @@ public class MavenEnvironment {
             DependencyTreeBuilder aDependencyTreeBuilder, ArtifactRepository aLocalRepository,
             SecDispatcher aSecurityDispatcher, MavenProjectBuilder aProjectBuilder,
             LifecycleExecutor aLifecycleExecutor, ArtifactFactory aArtifactFactory,
-            ArtifactMetadataSource aArtifactMetadataSource, ArtifactCollector aArtifactCollector, File aSonarConfiguration, RuntimeInformation aRuntimeInformation) {
+            ArtifactMetadataSource aArtifactMetadataSource, ArtifactCollector aArtifactCollector, RuntimeInformation aRuntimeInformation) {
         mavenSession = aMavenSession;
         buildPluginManager = aBuildPluginManager;
         log = aLog;
@@ -64,7 +62,6 @@ public class MavenEnvironment {
         artifactFactory = aArtifactFactory;
         artifactMetadataSource = aArtifactMetadataSource;
         artifactCollector = aArtifactCollector;
-        sonarConfiguration = aSonarConfiguration;
         runtimeInformation = aRuntimeInformation;
     }
 
@@ -114,9 +111,5 @@ public class MavenEnvironment {
 
     public ArtifactCollector getArtifactCollector() {
         return artifactCollector;
-    }
-
-    public File getSonarConfiguration() {
-        return sonarConfiguration;
     }
 }

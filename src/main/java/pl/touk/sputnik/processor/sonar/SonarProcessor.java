@@ -25,6 +25,7 @@ import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
 import com.google.common.annotations.VisibleForTesting;
 
 import pl.touk.sputnik.configuration.Configuration;
+import pl.touk.sputnik.configuration.ConfigurationOption;
 import pl.touk.sputnik.review.Review;
 import pl.touk.sputnik.review.ReviewException;
 import pl.touk.sputnik.review.ReviewFile;
@@ -36,6 +37,23 @@ import pl.touk.sputnik.review.Violation;
 public class SonarProcessor implements ReviewProcessor {
 
     private static final String PROCESSOR_NAME = "Sonar";
+
+    public final static ConfigurationOption SONAR_CONFIGURATION = new ConfigurationOption() {
+        @Override
+        public String getKey() {
+            return "sonar.configurationFile";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Sonar configuration file";
+        }
+
+        @Override
+        public String getDefaultValue() {
+            return "";
+        }
+    };
 
     private final Configuration configuration;
 
@@ -73,8 +91,12 @@ public class SonarProcessor implements ReviewProcessor {
 
             Properties theSonarConfigurationToAdd = new Properties();
             theSonarConfigurationToAdd.load(getClass().getResourceAsStream("/default-sonar.properties"));
-            try (InputStream theStream = new FileInputStream(theEnvironment.getSonarConfiguration())) {
-                theSonarConfigurationToAdd.load(theStream);
+
+            String theSonarConfiguration = configuration.getProperty(SONAR_CONFIGURATION);
+            if (!StringUtils.isEmpty(theSonarConfiguration)) {
+                try (InputStream theStream = new FileInputStream(new File(theSonarConfiguration))) {
+                    theSonarConfigurationToAdd.load(theStream);
+                }
             }
 
             theRunner.addGlobalProperties(theSonarConfigurationToAdd);

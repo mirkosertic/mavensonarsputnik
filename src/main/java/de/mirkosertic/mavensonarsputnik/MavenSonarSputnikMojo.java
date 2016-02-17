@@ -68,12 +68,6 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
     @Parameter(defaultValue = "${sputnikConfiguration}", required = true)
     private File sputnikConfiguration;
 
-    /**
-     * The Sonar configuration property file.
-     */
-    @Parameter(defaultValue = "${sonarConfiguration}", required = true)
-    private File sonarConfiguration;
-
     @Component
     private ArtifactFactory artifactFactory;
 
@@ -136,7 +130,7 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
                     dependencyTreeBuilder, localRepository,
                     securityDispatcher, projectBuilder,
                     lifecycleExecutor, artifactFactory,
-                    artifactMetadataSource, artifactCollector, sonarConfiguration, runtimeInformation);
+                    artifactMetadataSource, artifactCollector, runtimeInformation);
 
             Configuration theConfiguration = ConfigurationBuilder.initFromProperties(theSputnikProperties);
 

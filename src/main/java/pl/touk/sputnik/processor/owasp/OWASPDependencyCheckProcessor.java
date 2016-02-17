@@ -306,10 +306,20 @@ public class OWASPDependencyCheckProcessor implements ReviewProcessor {
             for (int k=0;k<theLines.size();k++) {
                 String theSingleLine = theLines.get(k);
                 if (theSingleLine.contains("<artifactId>" + aMavenIdentifier.getArtifactId() + "</artifactId")) {
-                    Violation theViolation = new Violation(aReviewFile.getReviewFilename(), k+1, theCompleteComment,
-                            severity);
-                    aResult.add(theViolation);
-                    theSomethingFound = true;
+
+                    boolean theGroupIdFound = false;
+                    if (k>0) {
+                        theGroupIdFound = theGroupIdFound || theLines.get(k-1).contains("<groupId>" + aMavenIdentifier.getGroupId() + "</groupId");
+                    }
+                    if (k<theLines.size() - 1) {
+                        theGroupIdFound = theGroupIdFound || theLines.get(k+1).contains("<groupId>" + aMavenIdentifier.getGroupId() + "</groupId");
+                    }
+                    if (theGroupIdFound) {
+                        Violation theViolation = new Violation(aReviewFile.getReviewFilename(), k + 1, theCompleteComment,
+                                severity);
+                        aResult.add(theViolation);
+                        theSomethingFound = true;
+                    }
                 }
             }
 

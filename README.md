@@ -17,7 +17,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 The following command can be used in conjunction with the [Gerrit Trigger](https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger) on Jenkins:
 
 ```
-mvn de.mirkosertic.mavensonarsputnik:sputnik:1.5:sputnik 
+mvn de.mirkosertic.mavensonarsputnik:sputnik:1.6:sputnik 
    -DgerritRevision=<GERRIT_REVISION_ID> 
    -DgerritChangeId=<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 
@@ -50,7 +50,7 @@ sonar.host.url=<URL to Sonar Web UI>
 
 ### Mutation Testing
 
-This plugin can integrate Mutation Testing results based on PITest in the review. To enable this,
+This plugin can integrate Mutation Testing results based on [PITest](http://pitest.org) in the review. To enable this,
 PITest must be executed as part of the Maven build.
 
 Additional goals and configuration:
@@ -62,12 +62,12 @@ mvn org.pitest:pitest-maven:1.1.9:scmMutationCoverage -DanalyseLastCommit=true
 You also need to enable the PITest Reviewer in the sputnik.properties file by adding the following line:
 
 ```
-pitest.enabled
+pitest.enabled=true
 ```
 
 ### OWASP Dependency Checks
 
-This plugin also runs a OWASP Dependency Check in case of any changes at the Maven project configuration, hence if a pom.xml is part of the current patchset.
+This plugin also runs a [OWASP Dependency Check](https://www.owasp.org/index.php/OWASP_Dependency_Check) in case of any changes at the Maven project configuration, hence if a pom.xml is part of the current patchset.
 
 To enable the OWASP Dependency Reviewer in the sputnik.properties file by adding the following line:
 

@@ -21,7 +21,6 @@ mvn de.mirkosertic.mavensonarsputnik:sputnik:1.5:sputnik
    -DgerritRevision=<GERRIT_REVISION_ID> 
    -DgerritChangeId=<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 
-   -DsonarConfiguration=<path-to-sonar.properties
 ```
 
 The sputnik.properties file contains authentication information to connect to Gerrit:
@@ -32,6 +31,8 @@ connector.path=<Gerrit context>
 connector.port=<Gerrit port>
 connector.username=<Gerrit username>
 connector.password=<Gerrit password>
+sonar.enabled=true
+sonar.configurationFile=<path to sonar.properties>
 ```
 
 The sonar.properties file contains authentication information to connect to SonarQube:
@@ -58,10 +59,21 @@ Additional goals and configuration:
 mvn org.pitest:pitest-maven:1.1.9:scmMutationCoverage -DanalyseLastCommit=true
 ```
 
+You also need to enable the PITest Reviewer in the sputnik.properties file by adding the following line:
+
+```
+pitest.enabled
+```
+
 ### OWASP Dependency Checks
 
-This plugin also runs a OWASP Dependency Check in case of any changes at the Maven project configuration, hence if a pom.xml is 
-part of the current patchset.
+This plugin also runs a OWASP Dependency Check in case of any changes at the Maven project configuration, hence if a pom.xml is part of the current patchset.
+
+To enable the OWASP Dependency Reviewer in the sputnik.properties file by adding the following line:
+
+```
+owaspdependencycheck.enabled=true
+```
 
 ### Automated Quality Feedback
 

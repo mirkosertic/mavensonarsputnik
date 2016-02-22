@@ -1,5 +1,6 @@
 package pl.touk.sputnik.processor.pitest;
 
+import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import lombok.extern.slf4j.Slf4j;
 import pl.touk.sputnik.configuration.Configuration;
 import pl.touk.sputnik.configuration.ConfigurationOption;
@@ -15,8 +16,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
@@ -26,12 +30,28 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.dependency;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 
 @Slf4j
 public class PITestProcessor implements ReviewProcessor {
@@ -167,10 +187,71 @@ public class PITestProcessor implements ReviewProcessor {
         }
     }
 
+    public static Xpp3Dom plainTextConfigurationFrom(String aXML) throws IOException, XmlPullParserException {
+        return Xpp3DomBuilder.build(new StringReader(aXML));
+    }
+
+    private Xpp3Dom createConfiguration() throws IOException, XmlPullParserException {
+
+        String theDefaultConfiguration = "<failWhenNoMutations>false</failWhenNoMutations><outputFormats><outputFormat>EXTENDEDXML</outputFormat></outputFormats>";
+
+        if (Boolean.parseBoolean(properties.getProperty("pitest.verbose"))) {
+            theDefaultConfiguration = theDefaultConfiguration + "<verbose>true</verbose>";
+        }
+
+        if (Boolean.parseBoolean(properties.getProperty("pitest.onlylastcommit"))) {
+            return plainTextConfigurationFrom("<configuration><analyseLastCommit>true</analyseLastCommit>" + theDefaultConfiguration + "</configuration>");
+        }
+        return plainTextConfigurationFrom("<configuration>" + theDefaultConfiguration + " </configuration>");
+    }
+
+    private void invokePITest() {
+        MavenEnvironment theEnvironment = MavenEnvironment.get();
+        MavenSession theSession = theEnvironment.getMavenSession();
+        for (MavenProject theProject : theSession.getAllProjects()) {
+            MavenProject theOldProject = theSession.getCurrentProject();
+
+            log.info("Invoking PITest for {}:{}", theProject.getGroupId(), theProject.getArtifact());
+
+            theSession.setCurrentProject(theProject);
+
+            String theCurrentVersion = getClass().getPackage().getImplementationVersion();
+
+            List<Dependency> theDependencies = new ArrayList<>();
+            theDependencies.add(dependency("de.mirkosertic.mavensonarsputnik", "pitest-plugins", theCurrentVersion));
+
+            try {
+
+                executeMojo(
+                        plugin(
+                                groupId("org.pitest"),
+                                artifactId("pitest-maven"),
+                                version(properties.getProperty("pitest.pluginversion")),
+                                theDependencies
+                        ),
+                        goal(properties.getProperty("pitest.pluginGoal")),
+                        createConfiguration(),
+                        executionEnvironment(
+                                theProject,
+                                theEnvironment.getMavenSession(),
+                                theEnvironment.getBuildPluginManager()
+                        )
+                );
+            } catch (Exception e) {
+                log.warn("Error invoking PITest, but analysis will continue", e);
+            } finally {
+                theSession.setCurrentProject(theOldProject);
+            }
+        }
+    }
+
     @Nullable @Override
     public ReviewResult process(@NotNull Review aReview) {
 
         try {
+
+            invokePITest();
+
             final String theMutationsFileName = properties.getProperty("pitest.mutationxmlreportfilename");
 
             File theWorkingDir = new File(System.getProperty("user.dir"));
@@ -186,7 +267,13 @@ public class PITestProcessor implements ReviewProcessor {
             ReviewResult theResult = new ReviewResult();
 
             for (File theFile :theFiles) {
-                addFromMutationReportTo(aReview, theFile, theResult);
+                try {
+                    log.info("Parsing report file {}", theFile);
+
+                    addFromMutationReportTo(aReview, theFile, theResult);
+                } catch (Exception e) {
+                    log.warn("Error parsing file {}", theFile, e);
+                }
             }
 
             return theResult;

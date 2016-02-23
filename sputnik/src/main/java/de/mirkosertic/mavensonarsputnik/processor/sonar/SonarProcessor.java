@@ -1,14 +1,21 @@
 package de.mirkosertic.mavensonarsputnik.processor.sonar;
 
+import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
+import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
+import lombok.extern.slf4j.Slf4j;
+import pl.touk.sputnik.configuration.Configuration;
+import pl.touk.sputnik.configuration.ConfigurationOption;
+import pl.touk.sputnik.review.Review;
+import pl.touk.sputnik.review.ReviewException;
+import pl.touk.sputnik.review.ReviewFile;
+import pl.touk.sputnik.review.ReviewProcessor;
+import pl.touk.sputnik.review.ReviewResult;
+import pl.touk.sputnik.review.Violation;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
-
-import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
-import de.mirkosertic.mavensonarsputnik.Options;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -21,39 +28,16 @@ import org.sonarsource.scanner.maven.bootstrap.MavenProjectConverter;
 import org.sonarsource.scanner.maven.bootstrap.PropertyDecryptor;
 import org.sonarsource.scanner.maven.bootstrap.RunnerBootstrapper;
 import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
-
 import com.google.common.annotations.VisibleForTesting;
-
-import pl.touk.sputnik.configuration.Configuration;
-import pl.touk.sputnik.configuration.ConfigurationOption;
-import pl.touk.sputnik.review.Review;
-import pl.touk.sputnik.review.ReviewException;
-import pl.touk.sputnik.review.ReviewFile;
-import pl.touk.sputnik.review.ReviewProcessor;
-import pl.touk.sputnik.review.ReviewResult;
-import pl.touk.sputnik.review.Violation;
 
 @Slf4j
 public class SonarProcessor implements ReviewProcessor {
 
     private static final String PROCESSOR_NAME = "Sonar";
 
-    public final static ConfigurationOption SONAR_CONFIGURATION = new ConfigurationOption() {
-        @Override
-        public String getKey() {
-            return "sonar.configurationFile";
-        }
+    public final static ConfigurationOption SONAR_CONFIGURATION = new DefaultConfigurationOption("sonar.configurationFile", "Sonar configuration file", "");
 
-        @Override
-        public String getDescription() {
-            return "Sonar configuration file";
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return "";
-        }
-    };
+    public final static ConfigurationOption ADDITIONAL_REPORTS = new DefaultConfigurationOption("sonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", "");
 
     private final Configuration configuration;
 
@@ -107,7 +91,7 @@ public class SonarProcessor implements ReviewProcessor {
 
             SonarResultParser parser = new SonarResultParser(resultFile);
 
-            String theAdditionalFileNames = configuration.getProperty(Options.ADDITIONAL_REPORTS);
+            String theAdditionalFileNames = configuration.getProperty(ADDITIONAL_REPORTS);
             if (theAdditionalFileNames != null) {
                 for (String theFileName : StringUtils.split(theAdditionalFileNames,",")) {
                     File theSingleFile = new File(resultFile.getParent(), theFileName);

@@ -1,6 +1,7 @@
 package de.mirkosertic.mavensonarsputnik.processor.pitest;
 
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
+import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
 import lombok.extern.slf4j.Slf4j;
 import pl.touk.sputnik.configuration.Configuration;
 import pl.touk.sputnik.configuration.ConfigurationOption;
@@ -32,7 +33,6 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
@@ -56,39 +56,8 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 @Slf4j
 public class PITestProcessor implements ReviewProcessor {
 
-    public final static ConfigurationOption PITEST_ENABLED = new ConfigurationOption() {
-        @Override
-        public String getKey() {
-            return "pitest.enabled";
-        }
-
-        @Override
-        public String getDescription() {
-            return "PITest enabled";
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return "true";
-        }
-    };
-
-    public final static ConfigurationOption PITEST_CONFIGURATION = new ConfigurationOption() {
-        @Override
-        public String getKey() {
-            return "pitest.configurationFile";
-        }
-
-        @Override
-        public String getDescription() {
-            return "PITest configuration file";
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return "";
-        }
-    };
+    public final static ConfigurationOption PITEST_ENABLED = new DefaultConfigurationOption("pitest.enabled", "PITest enabled", "true");
+    public final static ConfigurationOption PITEST_CONFIGURATION = new DefaultConfigurationOption("pitest.configurationFile", "PITest configuration file", "");
 
     private static final String NAME = "PITest";
 

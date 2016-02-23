@@ -1,19 +1,17 @@
-package de.mirkosertic.mavensonarsputnik;
+package de.mirkosertic.mavensonarsputnik.processor;
 
 import pl.touk.sputnik.configuration.ConfigurationOption;
 
-public enum Options implements ConfigurationOption {
-
-    ADDITIONAL_REPORTS("sonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", ""),;
+public class DefaultConfigurationOption implements ConfigurationOption {
 
     private final String key;
     private final String description;
     private final String defaultValue;
 
-    Options(String aKey, String aDescription, String aDefaultValue) {
-        this.key = aKey;
-        this.description = aDescription;
-        this.defaultValue = aDefaultValue;
+    public DefaultConfigurationOption(String aKey, String aDescription, String aDefaultValue) {
+        key = aKey;
+        description = aDescription;
+        defaultValue = aDefaultValue;
     }
 
     @Override

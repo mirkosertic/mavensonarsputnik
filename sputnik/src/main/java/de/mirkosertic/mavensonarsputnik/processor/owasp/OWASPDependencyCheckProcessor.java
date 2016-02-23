@@ -1,6 +1,7 @@
 package de.mirkosertic.mavensonarsputnik.processor.owasp;
 
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
+import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
 import lombok.extern.slf4j.Slf4j;
 import pl.touk.sputnik.configuration.Configuration;
 import pl.touk.sputnik.configuration.ConfigurationOption;
@@ -50,39 +51,9 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 @Slf4j
 public class OWASPDependencyCheckProcessor implements ReviewProcessor {
 
-    public final static ConfigurationOption OWASPDEPENDENCYCHECK_ENABLED = new ConfigurationOption() {
-        @Override
-        public String getKey() {
-            return "owaspdependencycheck.enabled";
-        }
+    public final static ConfigurationOption OWASPDEPENDENCYCHECK_ENABLED = new DefaultConfigurationOption("owaspdependencycheck.enabled", "OWASP Dependency Check enabled", "true");
 
-        @Override
-        public String getDescription() {
-            return "OWASP Dependency Check enabled";
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return "true";
-        }
-    };
-
-    public final static ConfigurationOption OWASPDEPENDENCYCHECK_CONFIGURATION = new ConfigurationOption() {
-        @Override
-        public String getKey() {
-            return "owaspdependencycheck.configurationFile";
-        }
-
-        @Override
-        public String getDescription() {
-            return "OWASP Dependency check configuration file";
-        }
-
-        @Override
-        public String getDefaultValue() {
-            return "";
-        }
-    };
+    public final static ConfigurationOption OWASPDEPENDENCYCHECK_CONFIGURATION = new DefaultConfigurationOption("owaspdependencycheck.configurationFile", "OWASP Dependency check configuration file", "");
 
     public static class MavenIdentifier {
 

@@ -138,6 +138,8 @@ public class MavenSonarSputnikMojo extends AbstractMojo {
             new Engine(facade, theConfiguration).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Error invoking sputnik", e);
+        } finally {
+            MavenEnvironment.cleanUp();
         }
     }
 

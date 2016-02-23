@@ -1,4 +1,4 @@
-package pl.touk.sputnik.processor.sonar;
+package de.mirkosertic.mavensonarsputnik.processor.sonar;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -122,7 +122,7 @@ public class SonarProcessor implements ReviewProcessor {
                 }
             }
 
-            return filterResults(parser.parseResults(), review);
+            return filterResults(parser.parseResults(Boolean.parseBoolean(theSonarConfigurationToAdd.getProperty("sonar.includeAllIssues"))), review);
         }
         catch (Exception e) {
             throw new ReviewException("SonarResultParser error", e);

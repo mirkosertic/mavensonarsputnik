@@ -1,5 +1,7 @@
 package pl.touk.sputnik.processor.owasp;
 
+import de.mirkosertic.mavensonarsputnik.processor.owasp.OWASPDependencyCheckProcessor;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;

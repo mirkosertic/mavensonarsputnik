@@ -1,4 +1,4 @@
-package pl.touk.sputnik.processor.pitest;
+package de.mirkosertic.mavensonarsputnik.processor.pitest;
 
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import lombok.extern.slf4j.Slf4j;

@@ -8,12 +8,13 @@ import pl.touk.sputnik.processor.codenarc.CodeNarcProcessor;
 import pl.touk.sputnik.processor.findbugs.FindBugsProcessor;
 import pl.touk.sputnik.processor.jshint.JsHintProcessor;
 import pl.touk.sputnik.processor.jslint.JsLintProcessor;
-import pl.touk.sputnik.processor.owasp.OWASPDependencyCheckProcessor;
-import pl.touk.sputnik.processor.pitest.PITestProcessor;
 import pl.touk.sputnik.processor.pmd.PmdProcessor;
 import pl.touk.sputnik.processor.scalastyle.ScalastyleProcessor;
-import pl.touk.sputnik.processor.sonar.SonarProcessor;
 import pl.touk.sputnik.review.ReviewProcessor;
+
+import de.mirkosertic.mavensonarsputnik.processor.owasp.OWASPDependencyCheckProcessor;
+import de.mirkosertic.mavensonarsputnik.processor.pitest.PITestProcessor;
+import de.mirkosertic.mavensonarsputnik.processor.sonar.SonarProcessor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package pl.touk.sputnik.processor.sonar;
+package de.mirkosertic.mavensonarsputnik.processor.sonar;
 
 import java.io.File;
 import java.io.FileReader;
@@ -39,7 +39,7 @@ class SonarResultParser {
     /**
      * Parses the file and returns all the issues as a ReviewResult.
      */
-    public ReviewResult parseResults() throws IOException {
+    public ReviewResult parseResults(boolean aIncludeAllNodes) throws IOException {
         ReviewResult result = new ReviewResult();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(new FileReader(resultFile));
@@ -49,10 +49,12 @@ class SonarResultParser {
 
         while (issuesIterator.hasNext()) {
             JsonNode issue = issuesIterator.next();
-            boolean isNew = issue.path("isNew").asBoolean();
-            if (!isNew) {
-                log.debug("Skipping already indexed issue: {}", issue.toString());
-                continue;
+            if (!aIncludeAllNodes) {
+                boolean isNew = issue.path("isNew").asBoolean();
+                if (!isNew) {
+                    log.debug("Skipping already indexed issue: {}", issue.toString());
+                    continue;
+                }
             }
             JsonNode lineNode = issue.path("line");
             if (lineNode.isMissingNode()) {

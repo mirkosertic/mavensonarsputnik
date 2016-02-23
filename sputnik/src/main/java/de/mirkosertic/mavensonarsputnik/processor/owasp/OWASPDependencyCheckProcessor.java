@@ -1,4 +1,4 @@
-package pl.touk.sputnik.processor.owasp;
+package de.mirkosertic.mavensonarsputnik.processor.owasp;
 
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import lombok.extern.slf4j.Slf4j;

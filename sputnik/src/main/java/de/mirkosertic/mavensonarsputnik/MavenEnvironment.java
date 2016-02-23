@@ -46,6 +46,10 @@ public class MavenEnvironment {
         return ENVIRONMENT.get();
     }
 
+    public static void cleanUp() {
+        ENVIRONMENT.remove();
+    }
+
     public MavenEnvironment(MavenSession aMavenSession, BuildPluginManager aBuildPluginManager, Log aLog,
             DependencyTreeBuilder aDependencyTreeBuilder, ArtifactRepository aLocalRepository,
             SecDispatcher aSecurityDispatcher, MavenProjectBuilder aProjectBuilder,

@@ -36,7 +36,7 @@ import java.util.Properties;
  * Execute Sputnik on the project and report the issues to Gerrit.
  */
 @Mojo(name = "sputnik", requiresDependencyResolution = ResolutionScope.TEST, defaultPhase = LifecyclePhase.INSTALL, aggregator = true)
-public class MavenSonarSputnikMojo extends AbstractMojo {
+public class MavenSputnikMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${session}", readonly = true)
     private MavenSession mavenSession;

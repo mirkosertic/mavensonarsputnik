@@ -33,11 +33,12 @@ import com.google.common.annotations.VisibleForTesting;
 @Slf4j
 public class SonarProcessor implements ReviewProcessor {
 
-    private static final String PROCESSOR_NAME = "Sonar";
+    private static final String PROCESSOR_NAME = "Custom Sonar";
 
-    public final static ConfigurationOption SONAR_CONFIGURATION = new DefaultConfigurationOption("sonar.configurationFile", "Sonar configuration file", "");
+    public final static ConfigurationOption SONAR_ENABLED = new DefaultConfigurationOption("customsonar.enabled", "Custom Sonar enabled", "true");
+    public final static ConfigurationOption SONAR_CONFIGURATION = new DefaultConfigurationOption("customsonar.configurationFile", "Custom Sonar configuration file", "");
 
-    public final static ConfigurationOption ADDITIONAL_REPORTS = new DefaultConfigurationOption("sonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", "");
+    public final static ConfigurationOption ADDITIONAL_REPORTS = new DefaultConfigurationOption("customsonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", "");
 
     private final Configuration configuration;
 

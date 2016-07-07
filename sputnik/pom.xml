@@ -58,7 +58,7 @@
         <dependency>
             <groupId>pl.touk</groupId>
             <artifactId>sputnik</artifactId>
-            <version>1.5.1</version>
+            <version>1.7.4</version>
             <exclusions>
                 <exclusion>
                     <artifactId>pmd-dist</artifactId>

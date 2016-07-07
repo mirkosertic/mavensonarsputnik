@@ -1,0 +1,3 @@
+de.mirkosertic.mavensonarsputnik.processor.owasp.OWASPDependenyCheckProcessorFactory
+de.mirkosertic.mavensonarsputnik.processor.pitest.PITestProcessorFactory
+de.mirkosertic.mavensonarsputnik.processor.sonar.SonarProcessorFactory

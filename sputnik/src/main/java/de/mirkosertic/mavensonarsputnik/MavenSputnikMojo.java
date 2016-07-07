@@ -135,7 +135,7 @@ public class MavenSputnikMojo extends AbstractMojo {
             Configuration theConfiguration = ConfigurationBuilder.initFromProperties(theSputnikProperties);
 
             ConnectorFacade facade = getConnectorFacade(theConfiguration);
-            new Engine(facade, theConfiguration).run();
+            new Engine(facade, facade, theConfiguration).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Error invoking sputnik", e);
         } finally {

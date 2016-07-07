@@ -1,10 +1,8 @@
-package pl.touk.sputnik.processor.owasp;
+package de.mirkosertic.mavensonarsputnik.processor.owasp;
 
-import de.mirkosertic.mavensonarsputnik.processor.owasp.OWASPDependencyCheckProcessor;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class OWASPDependencyCheckProcessorTest {
 

@@ -4,7 +4,7 @@ Maven Plugin for Sputnik with Multi-Module Support.
 
 Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenkins-ci.org) and [Gerrit](https://www.gerritcodereview.com) you can easily setup a pretested commit infrastructure for semi-automatic Code Reviews.
 
-[![Build Status](https://travis-ci.org/mirkosertic/mavensonarsputnik.svg?branch=master)](https://travis-ci.org/mirkosertic/mavensonarsputnik) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.mirkosertic.mavensonarsputnik/sputnik/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.mirkosertic.mavensonarsputnik/sputnik/badge.svg)
+[![Build Status](https://travis-ci.org/mirkosertic/mavensonarsputnik.svg?branch=master)](https://travis-ci.org/mirkosertic/mavensonarsputnik) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.mirkosertic.mavensonarsputnik/sputnik/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.mirkosertic.mavensonarsputnik/sputnik)
 
 ## System Requirements
 
@@ -17,7 +17,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 The following command can be used in conjunction with the [Gerrit Trigger](https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger) on Jenkins:
 
 ```
-mvn de.mirkosertic.mavensonarsputnik:sputnik:1.6:sputnik 
+mvn de.mirkosertic.mavensonarsputnik:sputnik:1.7:sputnik 
    -DgerritRevision=<GERRIT_REVISION_ID> 
    -DgerritChangeId=<GERRIT_PROJECT>~<GERRIT_BRANCH>~<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 
@@ -76,7 +76,7 @@ The Maven plugin can add reports to the review comments. For instance, a SonarQu
 Report embedding can be enabled by the following line in the sonar.properties file:
 
 ```
-sonar.additionalReviewCommentFiles=<comma separated list name of text file to embedd as review comment>
+customsonar.additionalReviewCommentFiles=<comma separated list name of text file to embedd as review comment>
 ```
 
 The reports must be stored in the SonarRunner working directory, project-root/.sonar.

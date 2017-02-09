@@ -1,9 +1,5 @@
 package de.mirkosertic.mavensonarsputnik.pitest;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.List;
 import org.pitest.coverage.TestInfo;
 import org.pitest.functional.Option;
 import org.pitest.mutationtest.ClassMutationResults;
@@ -13,6 +9,11 @@ import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.util.ResultOutputStrategy;
 import org.pitest.util.StringUtil;
 import org.pitest.util.Unchecked;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.List;
 
 public class PITestResultListener implements MutationResultListener {
 

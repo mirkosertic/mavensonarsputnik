@@ -11,7 +11,7 @@
     <groupId>de.mirkosertic.mavensonarsputnik</groupId>
     <artifactId>sputnik</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>maven-sonar-sputnik Maven Plugin</name>
+    <name>The Maven Sonar Sputnik Plugin</name>
 
     <dependencies>
         <dependency>
@@ -50,6 +50,16 @@
             <version>3.2.1</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.4.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
             <version>3.2.1</version>
@@ -58,7 +68,7 @@
         <dependency>
             <groupId>pl.touk</groupId>
             <artifactId>sputnik</artifactId>
-            <version>1.7.4</version>
+            <version>1.7.5</version>
             <exclusions>
                 <exclusion>
                     <artifactId>pmd-dist</artifactId>
@@ -110,7 +120,6 @@
             <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

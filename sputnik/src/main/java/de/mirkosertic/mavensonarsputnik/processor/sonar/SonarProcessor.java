@@ -1,8 +1,21 @@
 package de.mirkosertic.mavensonarsputnik.processor.sonar;
 
+import com.google.common.annotations.VisibleForTesting;
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.maven.DependencyCollector;
+import org.sonarsource.scanner.maven.ExtensionsFactory;
+import org.sonarsource.scanner.maven.bootstrap.LogHandler;
+import org.sonarsource.scanner.maven.bootstrap.MavenProjectConverter;
+import org.sonarsource.scanner.maven.bootstrap.PropertyDecryptor;
+import org.sonarsource.scanner.maven.bootstrap.RunnerBootstrapper;
+import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
 import pl.touk.sputnik.configuration.Configuration;
 import pl.touk.sputnik.configuration.ConfigurationOption;
 import pl.touk.sputnik.review.Review;
@@ -16,29 +29,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonarsource.scanner.maven.DependencyCollector;
-import org.sonarsource.scanner.maven.ExtensionsFactory;
-import org.sonarsource.scanner.maven.bootstrap.LogHandler;
-import org.sonarsource.scanner.maven.bootstrap.MavenProjectConverter;
-import org.sonarsource.scanner.maven.bootstrap.PropertyDecryptor;
-import org.sonarsource.scanner.maven.bootstrap.RunnerBootstrapper;
-import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
-import com.google.common.annotations.VisibleForTesting;
 
 @Slf4j
 public class SonarProcessor implements ReviewProcessor {
 
     private static final String PROCESSOR_NAME = "Custom Sonar";
 
-    public final static ConfigurationOption SONAR_ENABLED = new DefaultConfigurationOption("customsonar.enabled", "Custom Sonar enabled", "true");
-    public final static ConfigurationOption SONAR_CONFIGURATION = new DefaultConfigurationOption("customsonar.configurationFile", "Custom Sonar configuration file", "");
+    public static final ConfigurationOption SONAR_ENABLED = new DefaultConfigurationOption("customsonar.enabled", "Custom Sonar enabled", "true");
+    public static final ConfigurationOption SONAR_CONFIGURATION = new DefaultConfigurationOption("customsonar.configurationFile", "Custom Sonar configuration file", "");
 
-    public final static ConfigurationOption ADDITIONAL_REPORTS = new DefaultConfigurationOption("customsonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", "");
+    public static final ConfigurationOption ADDITIONAL_REPORTS = new DefaultConfigurationOption("customsonar.additionalReviewCommentFiles", "Comma saparated list of additional reports to add to add as comments", "");
 
     private final Configuration configuration;
 

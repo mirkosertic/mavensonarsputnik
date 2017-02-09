@@ -1,31 +1,16 @@
 package de.mirkosertic.mavensonarsputnik.processor.owasp;
 
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
 import lombok.extern.slf4j.Slf4j;
-import pl.touk.sputnik.configuration.Configuration;
-import pl.touk.sputnik.configuration.ConfigurationOption;
-import pl.touk.sputnik.review.Review;
-import pl.touk.sputnik.review.ReviewException;
-import pl.touk.sputnik.review.ReviewFile;
-import pl.touk.sputnik.review.ReviewProcessor;
-import pl.touk.sputnik.review.ReviewResult;
-import pl.touk.sputnik.review.Severity;
-import pl.touk.sputnik.review.Violation;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -39,23 +24,38 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import pl.touk.sputnik.configuration.Configuration;
+import pl.touk.sputnik.configuration.ConfigurationOption;
+import pl.touk.sputnik.review.Review;
+import pl.touk.sputnik.review.ReviewException;
+import pl.touk.sputnik.review.ReviewFile;
+import pl.touk.sputnik.review.ReviewProcessor;
+import pl.touk.sputnik.review.ReviewResult;
+import pl.touk.sputnik.review.Severity;
+import pl.touk.sputnik.review.Violation;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 @Slf4j
 public class OWASPDependencyCheckProcessor implements ReviewProcessor {
 
-    public final static ConfigurationOption OWASPDEPENDENCYCHECK_ENABLED = new DefaultConfigurationOption("owaspdependencycheck.enabled", "OWASP Dependency Check enabled", "true");
+    public static final ConfigurationOption OWASPDEPENDENCYCHECK_ENABLED = new DefaultConfigurationOption("owaspdependencycheck.enabled", "OWASP Dependency Check enabled", "true");
 
-    public final static ConfigurationOption OWASPDEPENDENCYCHECK_CONFIGURATION = new DefaultConfigurationOption("owaspdependencycheck.configurationFile", "OWASP Dependency check configuration file", "");
+    public static final ConfigurationOption OWASPDEPENDENCYCHECK_CONFIGURATION = new DefaultConfigurationOption("owaspdependencycheck.configurationFile", "OWASP Dependency check configuration file", "");
 
-    public static class MavenIdentifier {
+    static class MavenIdentifier {
 
         private final String groupId;
         private final String artifactId;
@@ -85,15 +85,12 @@ public class OWASPDependencyCheckProcessor implements ReviewProcessor {
         }
     }
 
-    private final Configuration configuration;
     private final Properties properties;
     private final Severity severity;
     private final boolean report;
     private final boolean reportTransitive;
 
     public OWASPDependencyCheckProcessor(Configuration aConfiguration) {
-        configuration = aConfiguration;
-
         properties = new Properties();
         try (InputStream theStream = getClass().getResourceAsStream("/default-owaspdependencycheck.properties")) {
             properties.load(theStream);

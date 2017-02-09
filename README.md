@@ -19,7 +19,7 @@ The following command can be used in conjunction with the [Gerrit Trigger](https
 ```
 mvn de.mirkosertic.mavensonarsputnik:sputnik:1.6:sputnik 
    -DgerritRevision=<GERRIT_REVISION_ID> 
-   -DgerritChangeId=<GERRIT_CHANGE_ID> 
+   -DgerritChangeId=<GERRIT_PROJECT>~<GERRIT_BRANCH>~<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 
 ```
 
@@ -31,8 +31,8 @@ connector.path=<Gerrit context>
 connector.port=<Gerrit port>
 connector.username=<Gerrit username>
 connector.password=<Gerrit password>
-sonar.enabled=true
-sonar.configurationFile=<path to sonar.properties>
+customsonar.enabled=true
+customsonar.configurationFile=<path to sonar.properties>
 ```
 
 The sonar.properties file contains authentication information to connect to SonarQube:
@@ -51,19 +51,13 @@ sonar.host.url=<URL to Sonar Web UI>
 ### Mutation Testing
 
 This plugin can integrate Mutation Testing results based on [PITest](http://pitest.org) in the review. To enable this,
-PITest must be executed as part of the Maven build.
-
-Additional goals and configuration:
-
-```
-mvn org.pitest:pitest-maven:1.1.9:scmMutationCoverage -DanalyseLastCommit=true
-```
-
-You also need to enable the PITest Reviewer in the sputnik.properties file by adding the following line:
+you also need to enable the PITest Reviewer in the sputnik.properties file by adding the following line:
 
 ```
 pitest.enabled=true
 ```
+
+The PITest Plugin is automatically invoked.
 
 ### OWASP Dependency Checks
 

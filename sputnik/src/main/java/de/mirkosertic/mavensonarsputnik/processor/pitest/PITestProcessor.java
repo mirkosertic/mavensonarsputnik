@@ -1,32 +1,17 @@
 package de.mirkosertic.mavensonarsputnik.processor.pitest;
 
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.dependency;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+
 import de.mirkosertic.mavensonarsputnik.MavenEnvironment;
 import de.mirkosertic.mavensonarsputnik.processor.DefaultConfigurationOption;
 import lombok.extern.slf4j.Slf4j;
-import pl.touk.sputnik.configuration.Configuration;
-import pl.touk.sputnik.configuration.ConfigurationOption;
-import pl.touk.sputnik.review.Review;
-import pl.touk.sputnik.review.ReviewException;
-import pl.touk.sputnik.review.ReviewFile;
-import pl.touk.sputnik.review.ReviewProcessor;
-import pl.touk.sputnik.review.ReviewResult;
-import pl.touk.sputnik.review.Severity;
-import pl.touk.sputnik.review.Violation;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -43,21 +28,36 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import pl.touk.sputnik.configuration.Configuration;
+import pl.touk.sputnik.configuration.ConfigurationOption;
+import pl.touk.sputnik.review.Review;
+import pl.touk.sputnik.review.ReviewException;
+import pl.touk.sputnik.review.ReviewFile;
+import pl.touk.sputnik.review.ReviewProcessor;
+import pl.touk.sputnik.review.ReviewResult;
+import pl.touk.sputnik.review.Severity;
+import pl.touk.sputnik.review.Violation;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.dependency;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 @Slf4j
 public class PITestProcessor implements ReviewProcessor {
 
-    public final static ConfigurationOption PITEST_ENABLED = new DefaultConfigurationOption("pitest.enabled", "PITest enabled", "true");
-    public final static ConfigurationOption PITEST_CONFIGURATION = new DefaultConfigurationOption("pitest.configurationFile", "PITest configuration file", "");
+    public static final ConfigurationOption PITEST_ENABLED = new DefaultConfigurationOption("pitest.enabled", "PITest enabled", "true");
+    public static final ConfigurationOption PITEST_CONFIGURATION = new DefaultConfigurationOption("pitest.configurationFile", "PITest configuration file", "");
 
     private static final String NAME = "PITest";
 
@@ -88,6 +88,8 @@ public class PITestProcessor implements ReviewProcessor {
         for (String theStatus : StringUtils.split(properties.getProperty("pitest.reportstatus"),",")) {
             includedStatus.add(theStatus.trim());
         }
+
+        log.info("Searching for the following mutation status {}", includedStatus);
     }
 
     private String getElementValue(Element aElement, String aElementName) {
@@ -113,9 +115,10 @@ public class PITestProcessor implements ReviewProcessor {
             boolean theDetected = Boolean.parseBoolean(theElement.getAttribute("detected"));
             String theStatus = theElement.getAttribute("status");
 
+            String theSourceFile = getElementValue(theElement, "sourceFile");
+            int theLineNumber = Integer.valueOf(getElementValue(theElement, "lineNumber"));
+
             if (includedStatus.contains(theStatus)) {
-                String theSourceFile = getElementValue(theElement, "sourceFile");
-                int theLineNumber = Integer.valueOf(getElementValue(theElement, "lineNumber"));
                 String theMutator = getElementValue(theElement, "mutator");
                 String theDescription = getElementValue(theElement, "description");
 
@@ -140,7 +143,7 @@ public class PITestProcessor implements ReviewProcessor {
                             theMessage.append("\n");
                             for (int j = 0; j < theTestInfos.getLength(); j++) {
                                 Element theTestInfo = (Element) theTestInfos.item(j);
-                                theMessage.append("*");
+                                theMessage.append(" * ");
                                 theMessage.append(theTestInfo.getTextContent());
                                 theMessage.append("\n");
                             }
@@ -152,6 +155,8 @@ public class PITestProcessor implements ReviewProcessor {
                         aResult.add(theViolation);
                     }
                 }
+            } else {
+                log.info("Ignoring mutation of type {} in file {}:{}", theStatus, theSourceFile, theLineNumber);
             }
         }
     }

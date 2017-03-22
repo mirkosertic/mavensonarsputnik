@@ -44,8 +44,9 @@ sonar.jdbc.driverClassName=<JDBC Driver>
 sonar.jdbc.username=<Sonar username>
 sonar.jdbc.password=<Sonar password>
 sonar.host.url=<URL to Sonar Web UI>
+```
 
-JDBC Configuration is only required for Sonarqube 4.```
+JDBC Configuration is only required for Sonarqube 4.
 
 ## Advanced Reporting
 

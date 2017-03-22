@@ -44,7 +44,8 @@ sonar.jdbc.driverClassName=<JDBC Driver>
 sonar.jdbc.username=<Sonar username>
 sonar.jdbc.password=<Sonar password>
 sonar.host.url=<URL to Sonar Web UI>
-```
+
+JDBC Configuration is only required for Sonarqube 4.```
 
 ## Advanced Reporting
 
@@ -93,6 +94,7 @@ SonarQube can generate HTML reports for a given PatchSet. To enable this feature
 # This are already the default values
 sonar.issuesReport.console.enable=true
 sonar.issuesReport.html.enable=true
+sonar.issuesReport.json.enable=tru
 ```
 
 SonarQube will place to files inside the .sonar/issues-report Directory of the workspace:

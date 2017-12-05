@@ -11,7 +11,7 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 | Plugin-Version | Java         | Maven         | SonarQube         |
 |----------------|--------------|---------------|-------------------|
 | 1.7            | min. 7       | min. 3.2.5    | min. 4.5          |
-| 1.8            | min. 8       | min. 3.2.4    | min. 4.5          | 
+| 1.8            | min. 8       | min. 3.2.5    | min. 4.5          | 
 
 ## Usage
 

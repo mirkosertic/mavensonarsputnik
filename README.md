@@ -8,16 +8,17 @@ Together with [Sputnik](https://github.com/TouK/sputnik), [Jenkins](https://jenk
 
 ## System Requirements
 
-* Java >=7
-* Maven >= 3.2.5
-* SonarQube >= 4.5
+| Plugin-Version | Java         | Maven         | SonarQube         |
+|----------------|--------------|---------------|-------------------|
+| 1.7            | min. 7       | min. 3.2.5    | min. 4.5          |
+| 1.8            | min. 8       | min. 3.2.4    | min. 4.5          | 
 
 ## Usage
 
 The following command can be used in conjunction with the [Gerrit Trigger](https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger) on Jenkins:
 
 ```
-mvn de.mirkosertic.mavensonarsputnik:sputnik:1.7:sputnik 
+mvn de.mirkosertic.mavensonarsputnik:sputnik:1.8:sputnik 
    -DgerritRevision=<GERRIT_REVISION_ID> 
    -DgerritChangeId=<GERRIT_PROJECT>~<GERRIT_BRANCH>~<GERRIT_CHANGE_ID> 
    -DsputnikConfiguration=<path-to-sputnik.properties> 

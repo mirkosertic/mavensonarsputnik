@@ -8,14 +8,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.api.EmbeddedScanner;
+import org.sonarsource.scanner.api.Utils;
 import org.sonarsource.scanner.maven.DependencyCollector;
 import org.sonarsource.scanner.maven.ExtensionsFactory;
+import org.sonarsource.scanner.maven.bootstrap.JavaVersionResolver;
 import org.sonarsource.scanner.maven.bootstrap.LogHandler;
 import org.sonarsource.scanner.maven.bootstrap.MavenProjectConverter;
 import org.sonarsource.scanner.maven.bootstrap.PropertyDecryptor;
-import org.sonarsource.scanner.maven.bootstrap.RunnerBootstrapper;
-import org.sonarsource.scanner.maven.bootstrap.RunnerFactory;
+import org.sonarsource.scanner.maven.bootstrap.ScannerBootstrapper;
+import org.sonarsource.scanner.maven.bootstrap.ScannerFactory;
 import pl.touk.sputnik.configuration.Configuration;
 import pl.touk.sputnik.configuration.ConfigurationOption;
 import pl.touk.sputnik.review.Review;
@@ -56,7 +58,7 @@ public class SonarProcessor implements ReviewProcessor {
         try {
             MavenEnvironment theEnvironment = MavenEnvironment.get();
 
-            File theWorkingDirectory = MavenProjectConverter.getSonarWorkDir(theEnvironment.getMavenSession().getCurrentProject());
+            File theWorkingDirectory = MavenEnvironment.getSonarWorkDir(theEnvironment.getMavenSession().getCurrentProject());
             theWorkingDirectory.mkdirs();
 
             // This will switch the cache to the working directory
@@ -65,14 +67,25 @@ public class SonarProcessor implements ReviewProcessor {
             ExtensionsFactory theExtensionsFactory = new ExtensionsFactory(theEnvironment.getLog(), theEnvironment.getMavenSession(), theEnvironment.getLifecycleExecutor(), theEnvironment.getArtifactFactory(), theEnvironment.getLocalRepository(), theEnvironment.getArtifactMetadataSource(), theEnvironment.getArtifactCollector(),
                     theEnvironment.getDependencyTreeBuilder(), theEnvironment.getProjectBuilder());
             DependencyCollector theDependencyCollector = new DependencyCollector(theEnvironment.getDependencyTreeBuilder(), theEnvironment.getLocalRepository());
-            MavenProjectConverter theMavenProjectConverter = new MavenProjectConverter(theEnvironment.getLog(), theDependencyCollector);
+
+            JavaVersionResolver theVersionResolver = new JavaVersionResolver(theEnvironment.getMavenSession(), theEnvironment.getLifecycleExecutor(), theEnvironment.getLog());
+
+            Properties theEnvProps = Utils.loadEnvironmentProperties(System.getenv());
+
+            MavenProjectConverter theMavenProjectConverter = new MavenProjectConverter(theEnvironment.getLog(), theDependencyCollector, theVersionResolver, theEnvProps);
             LogHandler theLogHandler = new LogHandler(theEnvironment.getLog());
 
             PropertyDecryptor thePropertyDecryptor = new PropertyDecryptor(theEnvironment.getLog(), theEnvironment.getSecurityDispatcher());
 
-            RunnerFactory theRunnerFactory = new RunnerFactory(theLogHandler, theEnvironment.getLog().isDebugEnabled(), theEnvironment.getRuntimeInformation(), theEnvironment.getMavenSession(), thePropertyDecryptor);
+            ScannerFactory theRunnerFactory = new ScannerFactory(theLogHandler,
+                    theEnvironment.getLog(),
+                    theEnvironment.getRuntimeInformation(),
+                    theEnvironment.getMojoExecution(),
+                    theEnvironment.getMavenSession(),
+                    theEnvProps,
+                    thePropertyDecryptor);
 
-            EmbeddedRunner theRunner = theRunnerFactory.create();
+            EmbeddedScanner theScanner = theRunnerFactory.create();
 
             Properties theSonarConfigurationToAdd = new Properties();
             theSonarConfigurationToAdd.load(getClass().getResourceAsStream("/default-sonar.properties"));
@@ -84,9 +97,9 @@ public class SonarProcessor implements ReviewProcessor {
                 }
             }
 
-            theRunner.addGlobalProperties(theSonarConfigurationToAdd);
+            theScanner.addGlobalProperties(theSonarConfigurationToAdd);
 
-            new RunnerBootstrapper(theEnvironment.getLog(), theEnvironment.getMavenSession(), theRunner, theMavenProjectConverter, theExtensionsFactory, thePropertyDecryptor).execute();
+            new ScannerBootstrapper(theEnvironment.getLog(), theEnvironment.getMavenSession(), theScanner, theMavenProjectConverter, theExtensionsFactory, thePropertyDecryptor).execute();
 
             File resultFile = new File(theWorkingDirectory, "sonar-report.json");
 

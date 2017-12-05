@@ -6,10 +6,10 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -18,6 +18,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 import pl.touk.sputnik.configuration.CliOption;
@@ -76,6 +77,9 @@ public class MavenSputnikMojo extends AbstractMojo {
     @Parameter(defaultValue = "${localRepository}", readonly = true, required = true)
     private ArtifactRepository localRepository;
 
+    @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
+    private MojoExecution mojoExecution;
+
     @Component
     private DependencyTreeBuilder dependencyTreeBuilder;
 
@@ -132,7 +136,7 @@ public class MavenSputnikMojo extends AbstractMojo {
                     dependencyTreeBuilder, localRepository,
                     securityDispatcher, projectBuilder,
                     lifecycleExecutor, artifactFactory,
-                    artifactMetadataSource, artifactCollector, runtimeInformation);
+                    artifactMetadataSource, artifactCollector, runtimeInformation, mojoExecution);
 
             Configuration theConfiguration = ConfigurationBuilder.initFromProperties(theSputnikProperties);
 

@@ -1,23 +1,24 @@
 package de.mirkosertic.mavensonarsputnik;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.plugin.BuildPluginManager;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.junit.Test;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
 
 public class MavenEnvironmentTest {
 
@@ -37,12 +38,13 @@ public class MavenEnvironmentTest {
         ArtifactMetadataSource aArtifactMetadataSource = mock(ArtifactMetadataSource.class);
         ArtifactCollector aArtifactCollector = mock(ArtifactCollector.class);
         RuntimeInformation aRuntimeInformation = mock(RuntimeInformation.class);
+        MojoExecution theExecution = mock(MojoExecution.class);
 
         MavenEnvironment.initialize(aMavenSession, aBuildPluginManager, aLog,
                 aDependencyTreeBuilder, aLocalRepository,
                 aSecurityDispatcher, aProjectBuilder,
                 aLifecycleExecutor, aArtifactFactory,
-                aArtifactMetadataSource, aArtifactCollector, aRuntimeInformation);
+                aArtifactMetadataSource, aArtifactCollector, aRuntimeInformation, theExecution);
 
         MavenEnvironment theMavenEnvironment = MavenEnvironment.get();
         assertNotNull(theMavenEnvironment);

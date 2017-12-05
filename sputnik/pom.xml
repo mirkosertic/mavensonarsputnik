@@ -96,7 +96,12 @@
         <dependency>
             <groupId>org.sonarsource.scanner.maven</groupId>
             <artifactId>sonar-maven-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.3.0.603</version>
+        </dependency>
+        <dependency>
+            <groupId>com.urswolfer.gerrit.client.rest</groupId>
+            <artifactId>gerrit-rest-java-client</artifactId>
+            <version>0.8.13</version>
         </dependency>
         <dependency>
             <groupId>org.twdata.maven</groupId>
@@ -126,7 +131,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
                 <configuration>
                     <goalPrefix>sputnik</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -153,12 +158,9 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <enforceBytecodeVersion>
-                                    <maxJdkVersion>1.7</maxJdkVersion>
-                                    <excludes>
-                                        <exclude>com.sun:tools</exclude>
-                                    </excludes>
-                                </enforceBytecodeVersion>
+                                <requireJavaVersion>
+                                    <version>1.8</version>
+                                </requireJavaVersion>
                             </rules>
                             <fail>true</fail>
                         </configuration>
@@ -166,9 +168,9 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>extra-enforcer-rules</artifactId>
-                        <version>1.0-beta-4</version>
+                        <groupId>org.apache.maven.enforcer</groupId>
+                        <artifactId>enforcer-rules</artifactId>
+                        <version>1.4.1</version>
                     </dependency>
                 </dependencies>
             </plugin>

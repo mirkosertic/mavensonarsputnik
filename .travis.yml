@@ -3,8 +3,8 @@ sudo: false
 language: java
 
 jdk:
-  - oraclejdk7
-  - oraclejdk8
+    - oraclejdk8
+    - oraclejdk9
 
 env:
   global:
@@ -13,6 +13,7 @@ env:
     - FILE=apache-maven-VERSION-bin.tar.gz
     - DIR=apache-maven-VERSION/bin
   matrix:
+    - VERSION=3.5.2
     - VERSION=3.3.9
     - VERSION=3.2.5
 

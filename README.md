@@ -96,7 +96,7 @@ SonarQube can generate HTML reports for a given PatchSet. To enable this feature
 # This are already the default values
 sonar.issuesReport.console.enable=true
 sonar.issuesReport.html.enable=true
-sonar.issuesReport.json.enable=tru
+sonar.issuesReport.json.enable=true
 ```
 
 SonarQube will place to files inside the .sonar/issues-report Directory of the workspace:
